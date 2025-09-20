@@ -1,11 +1,4 @@
 import axios from 'axios'
-import { refreshToken } from '@/features/shared/authSlice';
-
-// Remove store import and add getStore function
-let storeInstance = null;
-export const injectStore = _store => {
-  storeInstance = _store;
-};
 
 // 🌍 Root Domain from .env
 // const BASE_ROOT = 'https://bluapi.aas.technology';
@@ -46,48 +39,3 @@ export const axiosInstancePublic = axios.create({
     'Content-Type': 'application/json',
   },
 })
-
-const axiosInstanceRefresh = axios.create();
-
-axiosInstanceRefresh.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    if (!storeInstance) {
-      return Promise.reject(new Error('Store not initialized'));
-    }
-
-    const originalRequest = error.config;
-    const status = error.response?.status;
-
-    if (status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-
-      try {
-        await storeInstance.dispatch(refreshToken()).unwrap();
-        return axiosInstanceRefresh(originalRequest);
-      } catch (refreshError) {
-        // Handle refresh token failure
-        return Promise.reject(refreshError);
-      }
-    }
-
-    return Promise.reject(error);
-  }
-);
-
-// Add response interceptors to all axios instances
-[axiosInstance, axiosInstance2, axiosInstance3, axiosInstancePublic].forEach(instance => {
-  instance.interceptors.response.use(
-    response => response,
-    error => {
-      // Handle case where response or data is null
-      if (!error.response?.data) {
-        return Promise.reject(new Error('Network error or invalid response'));
-      }
-      return Promise.reject(error);
-    }
-  );
-});
-
-export default axiosInstanceRefresh;
-

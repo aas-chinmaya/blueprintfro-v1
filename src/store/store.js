@@ -18,6 +18,7 @@ import taskReducer from '@/features/taskSlice';
 import subTaskReducer from '@/features/subTaskSlice';
 
 import bugReducer from '@/features/bugSlice';
+import documentReducer from '@/features/documentSlice';
 
 // module reducer
 import contactReducer from '@/features/contactSlice';
@@ -30,6 +31,7 @@ import quotationReducer from '@/features/quotationSlice';
 import clientReducer from '@/features/clientSlice';
 import paymentReducer from '@/features/meeting/paymentSlice'
 import causeReducer from '@/features/causeSlice';
+
 
 //master table
 import slotReducer from '@/features/master/slotMasterSlice';
@@ -95,6 +97,7 @@ export const store = configureStore({
   cause: causeReducer,
 
   payment: paymentReducer,
+  documents: documentReducer,
 
   //master
   slots: slotReducer,

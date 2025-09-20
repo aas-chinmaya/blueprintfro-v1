@@ -23,7 +23,7 @@ import {
   FiEdit,
   FiPaperclip,
 } from "react-icons/fi";
-import { Briefcase, TrendingUp, FileStack, BugIcon, CheckCircle, Pencil } from "lucide-react";
+import { Briefcase, TrendingUp, FileStack, BugIcon, CheckCircle, Pencil, Dock } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 // import ViewTeamByProjectId from "@/modules/team/viewTeamByProjectId";
 // import CreateTeamForm from "@/modules/team/createTeam";
@@ -59,6 +59,8 @@ import ProjectwiseAllMeetingAndMom from "../meetings/project/ProjectwiseAllmeeti
 import { formatDateUTC } from "@/utils/formatDate";
 
 import TeamManagement from "../Teams/TeamManagement";
+import DocumentManager from "../document/project-doc/DocumentManager";
+
 export default function ViewProjectById({ projectId }) {
 
 
@@ -197,6 +199,11 @@ const searchParams = useSearchParams();
       label: "Meeting",
       icon: <LuFolderClock className="h-5 w-5" />,
     },
+    {
+      id: "documents",
+      label: "Documents",
+      icon: <Dock className="h-5 w-5" />,
+    },
   ];
 
   
@@ -249,7 +256,7 @@ const canEditStatus = currentUser?.role?.toLowerCase() === "cpc" || isTeamLead |
   Back
 </button>
               <CardTitle className="text-2xl font-bold text-black">
-                {project.data.projectName || "Unnamed Project"}
+                {project?.data.projectName || "Unnamed Project"}
               </CardTitle>
             </div>
             {statusUpdateMessage && (
@@ -306,7 +313,7 @@ const canEditStatus = currentUser?.role?.toLowerCase() === "cpc" || isTeamLead |
                       <span className="font-semibold text-gray-900 w-28">
                         Project ID:
                       </span>
-                      <span>{project.data.projectId}</span>
+                      <span>{project?.data.projectId}</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <FiPaperclip className="h-4 w-4 text-[#38b000]" />
@@ -314,8 +321,8 @@ const canEditStatus = currentUser?.role?.toLowerCase() === "cpc" || isTeamLead |
                         Category:
                       </span>
                     <span>
-                        {project.data.category
-                          ? project.data.category
+                        {project?.data.category
+                          ? project?.data.category
                               .toLowerCase()
                               .split(' ')
                               .map(word => word.charAt(0).toUpperCase() + word.slice(1))
@@ -532,6 +539,14 @@ const canEditStatus = currentUser?.role?.toLowerCase() === "cpc" || isTeamLead |
 
 
                 <ProjectwiseAllMeetingAndMom project={project.data} projectId={projectId} teamLeadId={project?.data?.teamLeadId} />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="documents" className="min-h-[calc(100vh-200px)]">
+              <div className="space-y-4">
+
+
+                <DocumentManager project={project.data} projectId={projectId} teamLeadId={project?.data?.teamLeadId} />
               </div>
             </TabsContent>
 
