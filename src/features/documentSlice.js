@@ -50,7 +50,7 @@ export const deleteSingleDocument = createAsyncThunk(
   "documents/deleteSingleDocument",
   async (docId, { rejectWithValue }) => {
     try {
-      await axiosInstance.delete(`/document/${docId}`);
+      await axiosInstance.delete(`/document/softdeletedocument/${docId}`);
       return docId;
     } catch (err) {
       return rejectWithValue(err.response?.data || { message: err.message });
@@ -76,7 +76,7 @@ export const downloadDocument = createAsyncThunk(
   "documents/downloadDocument",
   async ({ docId, fileName }, { rejectWithValue }) => {
     try {
-      const res = await axiosInstance.get(`/document/${docId}/download`, { 
+      const res = await axiosInstance.get(`/document/view/${docId}/`, { 
         responseType: "blob" 
       });
       

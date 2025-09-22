@@ -12,6 +12,7 @@ import EditTeamModal from "./EditTeamModal";
 import DeleteTeamModal from "./DeleteTeamModal";
 import ViewTeam from "./TeamView";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import {Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function TeamManagement({ projectId, project }) {
   const dispatch = useDispatch();
@@ -74,25 +75,42 @@ export default function TeamManagement({ projectId, project }) {
                 ({teams.length} Total)
               </span>
             </h2>
-            {(currentUser?.role === "cpc" ||
+            {/* {(currentUser?.role === "cpc" ||
               isTeamLead ||
               currentUser?.position === "Team Lead") && (
               <Button
                 onClick={() => setIsCreateModalOpen(true)}
-                className="bg-indigo-500 hover:bg-indigo-600 text-white rounded-md text-sm p-2"
+                className="bg-blue-500 hover:bg-blue-600 text-white rounded-md text-sm p-2"
                 aria-label="Create new team"
               >
                 <FiPlus className="h-5 w-5" />
               </Button>
-            )}
+            )} */}
+{(currentUser?.role === "cpc" ||
+  isTeamLead ||
+  currentUser?.position === "Team Lead") && (
+  <Tooltip>
+    <TooltipTrigger asChild>
+      <Button
+        onClick={() => setIsCreateModalOpen(true)}
+        className="bg-blue-500 hover:bg-blue-600 text-white rounded-md text-sm p-2"
+        aria-label="Create new team"
+      >
+        <FiPlus className="h-5 w-5" />
+      </Button>
+    </TooltipTrigger>
+    <TooltipContent
+      side="top"
+      align="center"
+      sideOffset={6}
+      className="text-white bg-black border border-gray-200 rounded-md p-2 text-xs shadow-sm"
+    >
+      Create Team
+    </TooltipContent>
+  </Tooltip>
+)}
 
-            {/* <Button
-              onClick={() => setIsCreateModalOpen(true)}
-              className="bg-indigo-500 hover:bg-indigo-600 text-white rounded-md text-sm p-2"
-              aria-label="Create new team"
-            >
-              <FiPlus className="h-5 w-5" />
-            </Button> */}
+        
           </div>
 
           {status === "succeeded" && teams.length === 0 && (

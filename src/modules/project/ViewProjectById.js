@@ -166,8 +166,8 @@ const searchParams = useSearchParams();
 
   const tabs = [
     {
-      id: "details",
-      label: "Details",
+      id: "detail",
+      label: "Detail's",
       icon: <FiInfo className="h-5 w-5" />,
     },
     {
@@ -178,8 +178,8 @@ const searchParams = useSearchParams();
       
 
     {
-      id: "tasks",
-      label: "Tasks",
+      id: "task",
+      label: "Task",
       icon: <FiList className="h-5 w-5" />,
     },
  
@@ -195,13 +195,13 @@ const searchParams = useSearchParams();
       icon: <BugIcon className="h-5 w-5" />,
     },
     {
-      id: "meeting",
-      label: "Meeting",
+      id: "mom",
+      label: "Mom",
       icon: <LuFolderClock className="h-5 w-5" />,
     },
     {
-      id: "documents",
-      label: "Documents",
+      id: "document",
+      label: "Document",
       icon: <Dock className="h-5 w-5" />,
     },
   ];
@@ -285,7 +285,7 @@ const canEditStatus = currentUser?.role?.toLowerCase() === "cpc" || isTeamLead |
               ))}
             </TabsList>
 
-            <TabsContent value="details" className="min-h-[calc(100vh-200px)]">
+            <TabsContent value="detail" className="min-h-[calc(100vh-200px)]">
               <div className="space-y-6">
                 <div className="space-y-4 pb-3">
                   <div className="flex items-center justify-between">
@@ -508,7 +508,7 @@ const canEditStatus = currentUser?.role?.toLowerCase() === "cpc" || isTeamLead |
               </div>
             </TabsContent>
 
-            <TabsContent value="tasks" className="min-h-[calc(100vh-200px)]">
+            <TabsContent value="task" className="min-h-[calc(100vh-200px)]">
               <div className="space-y-4">
                 <AllTaskListByProjectId
                   project={project.data}
@@ -534,7 +534,7 @@ const canEditStatus = currentUser?.role?.toLowerCase() === "cpc" || isTeamLead |
             </TabsContent>
 
 
-            <TabsContent value="meeting" className="min-h-[calc(100vh-200px)]">
+            <TabsContent value="mom" className="min-h-[calc(100vh-200px)]">
               <div className="space-y-4">
 
 
@@ -542,7 +542,7 @@ const canEditStatus = currentUser?.role?.toLowerCase() === "cpc" || isTeamLead |
               </div>
             </TabsContent>
 
-            <TabsContent value="documents" className="min-h-[calc(100vh-200px)]">
+            <TabsContent value="document" className="min-h-[calc(100vh-200px)]">
               <div className="space-y-4">
 
 

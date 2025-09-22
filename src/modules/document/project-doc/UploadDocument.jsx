@@ -1,5 +1,6 @@
 
 
+
 "use client";
 
 import { useState, useRef } from "react";
@@ -9,13 +10,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Upload, FileText, X, Edit2, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { Upload, FileText, X, Edit2, Loader2, CheckCircle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner"; // or your preferred toast library
+import { toast } from "sonner";
+import { validateInput, sanitizeInput } from "@/utils/sanitize";
 
-// Forbidden file types
 const forbiddenTypes = ["exe", "bat", "sh", "js", "msi", "com", "dll"];
 
 export default function UploadDocument({ projectId, onSuccess }) {
@@ -29,18 +29,18 @@ export default function UploadDocument({ projectId, onSuccess }) {
   const [dragActive, setDragActive] = useState(false);
   const [progress, setProgress] = useState(0);
   const [uploadStatus, setUploadStatus] = useState(null);
+  const [nameValidationError, setNameValidationError] = useState(null);
+  const [descriptionValidationError, setDescriptionValidationError] = useState(null);
   
   const fileInputRef = useRef(null);
+  const textareaRef = useRef(null);
 
-  // Handle single file selection
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (!selectedFile) return;
-
     validateAndSetFile(selectedFile);
   };
 
-  // Handle drag and drop
   const handleDrag = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -55,46 +55,44 @@ export default function UploadDocument({ projectId, onSuccess }) {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    
     const droppedFile = e.dataTransfer.files[0];
     if (!droppedFile) return;
-
     validateAndSetFile(droppedFile);
   };
 
-  // Validate and set file
   const validateAndSetFile = (selectedFile) => {
     const ext = selectedFile.name.split(".").pop().toLowerCase();
     const isForbiddenType = forbiddenTypes.includes(ext);
-    const isTooLarge = selectedFile.size > 10 * 1024 * 1024; // 10MB
+    const isTooLarge = selectedFile.size > 10 * 1024 * 1024;
 
     if (isForbiddenType) {
-      toast.error("File type not allowed", {
-        description: "Please select a supported file type"
-      });
+      toast.error("File type not allowed");
       return;
     }
 
     if (isTooLarge) {
-      toast.error("File too large", {
-        description: "Maximum file size is 10MB"
-      });
+      toast.error("File too large. Maximum 10MB");
       return;
     }
 
     setFile(selectedFile);
-    setDocName(selectedFile.name.split('.')[0]); // Use name without extension
+    // Sanitize the filename before setting it as docName
+    const sanitizedName = sanitizeInput(selectedFile.name.split('.')[0]);
+    setDocName(sanitizedName);
+    setNameValidationError(null);
     setIsEditingName(false);
     setDescription("");
+    setDescriptionValidationError(null);
     setProgress(0);
     setUploadStatus(null);
   };
 
-  // Remove file
   const handleRemoveFile = () => {
     setFile(null);
     setDocName("");
+    setNameValidationError(null);
     setDescription("");
+    setDescriptionValidationError(null);
     setIsEditingName(false);
     setProgress(0);
     setUploadStatus(null);
@@ -103,24 +101,61 @@ export default function UploadDocument({ projectId, onSuccess }) {
     }
   };
 
-  // Toggle filename editing
   const toggleEditName = () => {
     if (!isEditingName && file) {
       setIsEditingName(true);
     }
   };
 
-  // Save filename edit
   const saveEditName = () => {
+    if (!docName.trim() && file) {
+      const sanitizedName = sanitizeInput(file.name.split('.')[0]);
+      setDocName(sanitizedName);
+    }
+    
     if (docName.trim() && file) {
-      setIsEditingName(false);
-    } else if (file) {
-      setDocName(file.name.split('.')[0]);
+      // Validate the document name
+      const validation = validateInput(docName);
+      if (!validation.isValid) {
+        setNameValidationError(validation.warning);
+        return;
+      }
+      setNameValidationError(null);
       setIsEditingName(false);
     }
   };
 
-  // Format file size
+  const handleTextareaChange = (e) => {
+    const newValue = e.target.value.slice(0, 200);
+    setDescription(newValue);
+    
+    // Validate on change
+    const validation = validateInput(newValue);
+    if (!validation.isValid) {
+      setDescriptionValidationError(validation.warning);
+    } else {
+      setDescriptionValidationError(null);
+    }
+    
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 120) + 'px';
+    }
+  };
+
+  const handleNameChange = (e) => {
+    const newValue = e.target.value;
+    setDocName(newValue);
+    
+    // Validate document name on change
+    const validation = validateInput(newValue);
+    if (!validation.isValid) {
+      setNameValidationError(validation.warning);
+    } else {
+      setNameValidationError(null);
+    }
+  };
+
   const formatFileSize = (bytes) => {
     if (bytes === 0) return '0 B';
     const k = 1024;
@@ -129,30 +164,63 @@ export default function UploadDocument({ projectId, onSuccess }) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
   };
 
-  // Handle form submit - CORRECTED to match backend
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
+  const validateFormData = () => {
     if (!file) {
       toast.error("Please select a file");
-      return;
+      return false;
     }
     
     if (!description.trim()) {
-      toast.error("Description is required");
-      return;
+      setDescriptionValidationError("Description is required");
+      return false;
     }
 
     if (!docName.trim()) {
-      toast.error("Document name is required");
+      setNameValidationError("Document name is required");
+      return false;
+    }
+
+    // Final validation before submission
+    const nameValidation = validateInput(docName);
+    if (!nameValidation.isValid) {
+      setNameValidationError(nameValidation.warning);
+      return false;
+    }
+
+    const descValidation = validateInput(description);
+    if (!descValidation.isValid) {
+      setDescriptionValidationError(descValidation.warning);
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Clear previous errors
+    setNameValidationError(null);
+    setDescriptionValidationError(null);
+    
+    if (!validateFormData()) {
       return;
     }
 
-    // Create payload matching backend expectations
+    // Sanitize the final values
+    const sanitizedDocName = sanitizeInput(docName.trim());
+    const sanitizedDescription = sanitizeInput(description.trim());
+
+    // Double-check after sanitization
+    if (!sanitizedDocName || !sanitizedDescription) {
+      setNameValidationError("Invalid input: Content contains prohibited characters after sanitization");
+      return;
+    }
+
     const payload = {
-      name: docName.trim(),
-      description: description.trim(),
-      file, // File object - this is what multer expects
+      name: sanitizedDocName,
+      description: sanitizedDescription,
+      file,
       projectId
     };
 
@@ -160,24 +228,20 @@ export default function UploadDocument({ projectId, onSuccess }) {
       setUploadStatus('uploading');
       setProgress(0);
       
-      // Show initial progress
       setTimeout(() => {
-        setProgress(10); // Initial progress
+        setProgress(10);
       }, 100);
 
       const result = await dispatch(uploadSingleDocument(payload)).unwrap();
       
-      // Simulate progress completion
       setProgress(100);
       setUploadStatus('success');
       toast.success("Document uploaded successfully!");
       
-      // Reset form after success
       setTimeout(() => {
         handleRemoveFile();
         setUploadStatus(null);
         setProgress(0);
-        
         if (onSuccess) {
           onSuccess(result);
         }
@@ -200,236 +264,233 @@ export default function UploadDocument({ projectId, onSuccess }) {
   const fileSize = file ? formatFileSize(file.size) : "";
 
   return (
-    <Card className="w-full max-w-md mx-auto bg-gradient-to-br from-white to-blue-50/50 border-0 shadow-sm">
-      <CardHeader className="text-center pb-4">
-        <div className="flex items-center justify-center w-14 h-14 mx-auto bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg mb-4 border border-white/20">
-          <Upload className="w-7 h-7 text-blue-600" />
-        </div>
-        <CardTitle className="text-xl font-bold text-gray-900">Upload Document</CardTitle>
-        <CardDescription className="text-sm text-gray-600">
-          Add a document to your project
-        </CardDescription>
-      </CardHeader>
-
-      <CardContent className="p-0">
-        <form className="space-y-6 p-6" onSubmit={handleSubmit}>
-          {/* Error Display */}
-          {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-              <div className="flex items-center gap-2 text-red-700 text-sm">
-                <AlertCircle className="w-4 h-4" />
-                <span>{error}</span>
-              </div>
-            </div>
-          )}
-
-          {/* File Selection Area */}
-          {!file && (
-            <div className="space-y-4">
-              <div
-                className={cn(
-                  "relative p-8 border-2 border-dashed rounded-2xl transition-all duration-300 cursor-pointer group bg-white/50 backdrop-blur-sm",
-                  dragActive 
-                    ? "border-blue-400 bg-blue-50/80 shadow-lg" 
-                    : "border-gray-200 hover:border-blue-300 hover:bg-blue-25/50"
-                )}
-                onDragEnter={handleDrag}
-                onDragLeave={handleDrag}
-                onDragOver={handleDrag}
-                onDrop={handleDrop}
-              >
-                <Input
-                  ref={fileInputRef}
-                  id="file-upload"
-                  type="file"
-                  onChange={handleFileChange}
-                  accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.gif"
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  disabled={isUploading}
-                />
-                <div className="text-center">
-                  <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-white rounded-full shadow-md group-hover:shadow-lg transition-shadow">
-                    <Upload className="w-8 h-8 text-gray-400 group-hover:text-blue-600 transition-colors" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Drop your file here</h3>
-                  <p className="text-sm text-gray-500 mb-6">or click to browse</p>
-                  
-                  <Button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl transition-all px-6 py-2.5"
-                    disabled={isUploading}
-                  >
-                    <FileText className="w-4 h-4 mr-2" />
-                    Choose File
-                  </Button>
-                </div>
-              </div>
-              
-              <div className="text-xs text-center text-gray-500 bg-gray-50/50 rounded-xl py-3">
-                <p>📄 PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, Images, TXT</p>
-                <p className="text-blue-600 font-medium">Max 10MB</p>
-              </div>
-            </div>
-          )}
-
-          {/* File Preview & Form */}
-          {file && (
-            <div className="space-y-5">
-              {/* File Preview Card */}
-              <Card className="bg-white/80 backdrop-blur-sm border border-white/20 shadow-sm">
-                <CardContent className="p-5">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1 min-w-0">
-                      {isEditingName ? (
-                        <Input
-                          value={docName}
-                          onChange={(e) => setDocName(e.target.value)}
-                          onBlur={saveEditName}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") saveEditName();
-                            if (e.key === "Escape") {
-                              setDocName(file.name.split('.')[0]);
-                              setIsEditingName(false);
-                            }
-                          }}
-                          className="text-lg font-semibold text-gray-900 bg-transparent border-0 border-b border-blue-200 focus:border-blue-500 text-center py-0"
-                          autoFocus
-                          placeholder="Document name..."
-                          disabled={isUploading}
-                        />
-                      ) : (
-                        <div 
-                          className="cursor-pointer group text-center" 
-                          onClick={toggleEditName}
-                        >
-                          <div className="flex items-center justify-center gap-2 mb-1">
-                            <span className="text-lg font-semibold text-gray-900">
-                              {docName || file.name.split('.')[0]}
-                            </span>
-                            {!isUploading && (
-                              <Edit2 className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
-                            )}
-                          </div>
-                        </div>
-                      )}
-                      
-                      <div className="flex justify-center items-center gap-4 text-sm text-gray-500 bg-gray-50 rounded-full py-1 px-3">
-                        <span className="flex items-center gap-1">
-                          📄 {fileExtension}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          💾 {fileSize}
-                        </span>
-                      </div>
-                    </div>
-                    
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full p-2"
-                      onClick={handleRemoveFile}
-                      disabled={isUploading}
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Description Field */}
-              <div className="space-y-2">
-                <Label className="text-sm font-semibold text-gray-900 flex items-center gap-1">
-                  <span>Description</span> 
-                  <span className="text-blue-500">*</span>
-                </Label>
-                <Textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value.slice(0, 200))}
-                  placeholder="Describe this document..."
-                  rows={3}
-                  className="resize-none border-gray-200 focus:border-blue-500 focus:ring-blue-500 bg-white/80 text-gray-900 placeholder-gray-400"
-                  required
-                  disabled={isUploading}
-                />
-                <div className="flex justify-between text-xs text-gray-500">
-                  <span className="text-blue-500 font-medium">Required</span>
-                  <span className={cn(
-                    "font-medium", 
-                    description.length > 160 && "text-red-500"
-                  )}>
-                    {description.length}/200
-                  </span>
-                </div>
-              </div>
-
-              {/* Progress Bar */}
-              {isUploading && (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between text-sm text-gray-600">
-                    <span className="flex items-center gap-2">
-                      <Loader2 className="w-4 h-4 text-blue-600 animate-spin" />
-                      {uploadStatus === 'success' ? 'Finalizing...' : 'Uploading...'}
-                    </span>
-                    <span>{Math.round(progress)}%</span>
-                  </div>
-                  <Progress 
-                    value={progress} 
-                    className="h-2 [&>div]:bg-gradient-to-r [&>div]:from-blue-600 [&>div]:to-blue-700" 
-                  />
-                </div>
+  
+      <form className="space-y-6 p-6" onSubmit={handleSubmit}>
+        {!file && (
+          <div className="space-y-4">
+            <div
+              className={cn(
+                "relative p-8 border-2 border-dashed rounded-lg transition-all duration-300 cursor-pointer group bg-gray-50",
+                dragActive 
+                  ? "border-blue-500 bg-blue-50" 
+                  : "border-gray-300 hover:border-blue-400 hover:bg-blue-25"
               )}
-
-              {/* Action Buttons */}
-              <div className="flex gap-3 pt-2">
-                <Button
-                  type="submit"
-                  className={cn(
-                    "flex-1 shadow-lg hover:shadow-xl transition-all px-6 py-2.5",
-                    isUploading 
-                      ? "bg-gray-400 cursor-not-allowed" 
-                      : "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white"
-                  )}
-                  disabled={isUploading || !description.trim() || !docName.trim()}
-                >
-                  {isUploading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      {progress > 0 ? `Uploading ${Math.round(progress)}%` : 'Uploading...'}
-                    </>
-                  ) : (
-                    <>
-                      <Upload className="w-4 h-4 mr-2" />
-                      Upload Document
-                    </>
-                  )}
-                </Button>
+              onDragEnter={handleDrag}
+              onDragLeave={handleDrag}
+              onDragOver={handleDrag}
+              onDrop={handleDrop}
+            >
+              <Input
+                ref={fileInputRef}
+                id="file-upload"
+                type="file"
+                onChange={handleFileChange}
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.gif"
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                disabled={isUploading}
+              />
+              <div className="text-center">
+                <div className="flex items-center justify-center w-12 h-12 mx-auto mb-3 bg-white rounded-lg border">
+                  <Upload className="w-6 h-6 text-gray-400 group-hover:text-blue-600 transition-colors" />
+                </div>
+                <h3 className="text-lg font-semibold text-black mb-2">Drop your file here</h3>
+                <p className="text-sm text-gray-500 mb-4">or click to browse</p>
+                
                 <Button
                   type="button"
-                  variant="outline"
-                  className="border-gray-200 hover:bg-gray-50 text-gray-600 hover:text-gray-900 px-6 py-2.5"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5"
+                  disabled={isUploading}
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  Choose File
+                </Button>
+              </div>
+            </div>
+            
+            <div className="text-xs text-center text-gray-500 bg-gray-50 rounded-lg py-2">
+              <p>PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, Images, TXT</p>
+              <p className="text-blue-600 font-medium">Max 10MB</p>
+            </div>
+          </div>
+        )}
+
+        {file && (
+          <div className="space-y-5">
+            {/* File Preview Section */}
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex-1 min-w-0">
+                  {isEditingName ? (
+                    <div className="mb-2">
+                      <Label className="text-sm font-medium text-gray-700 mb-1 block">
+                        Document Name <span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        value={docName}
+                        onChange={handleNameChange}
+                        onBlur={saveEditName}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") saveEditName();
+                          if (e.key === "Escape") {
+                            const sanitizedName = sanitizeInput(file.name.split('.')[0]);
+                            setDocName(sanitizedName);
+                            setNameValidationError(null);
+                            setIsEditingName(false);
+                          }
+                        }}
+                        className={cn(
+                          "text-lg font-semibold text-black bg-white border-gray-300 focus:border-blue-500 rounded-md",
+                          nameValidationError && "border-red-500 focus:border-red-500"
+                        )}
+                        autoFocus
+                        placeholder="Document name..."
+                        disabled={isUploading}
+                        maxLength={100}
+                      />
+                      {nameValidationError && (
+                        <p className="text-xs text-red-500 mt-1">{nameValidationError}</p>
+                      )}
+                    </div>
+                  ) : (
+                    <div 
+                      className="cursor-pointer group mb-2" 
+                      onClick={toggleEditName}
+                    >
+                      <Label className="text-sm font-medium text-gray-700 mb-1 block">
+                        Document Name <span className="text-red-500">*</span>
+                      </Label>
+                      <div className="flex items-center justify-center gap-2">
+                        <span className="text-lg font-semibold text-black">
+                          {docName || sanitizeInput(file.name.split('.')[0])}
+                        </span>
+                        {!isUploading && (
+                          <Edit2 className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                        )}
+                      </div>
+                      {nameValidationError && (
+                        <p className="text-xs text-red-500 mt-1">{nameValidationError}</p>
+                      )}
+                    </div>
+                  )}
+                  
+                  <div className="flex justify-center items-center gap-4 text-sm text-gray-500 bg-white rounded-lg py-1 px-3 border border-gray-200">
+                    <span className="flex items-center gap-1">
+                      <FileText className="w-3 h-3" />
+                      {fileExtension}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      📁 {fileSize}
+                    </span>
+                  </div>
+                </div>
+                
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="text-gray-400 hover:text-red-500 hover:bg-red-50 rounded p-2 ml-2"
                   onClick={handleRemoveFile}
                   disabled={isUploading}
                 >
-                  <X className="w-4 h-4 mr-2" />
-                  Cancel
+                  <X className="w-4 h-4" />
                 </Button>
               </div>
             </div>
-          )}
 
-          {/* Success State */}
-          {uploadStatus === 'success' && (
-            <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
-              <div className="flex items-center gap-2 text-green-700">
-                <CheckCircle className="w-5 h-5 flex-shrink-0" />
-                <span className="text-sm font-medium">Upload completed successfully!</span>
+            {/* Description Section */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-gray-700 flex items-center gap-1">
+                <FileText className="w-4 h-4" />
+                Description <span className="text-red-500">*</span>
+              </Label>
+              <Textarea
+                ref={textareaRef}
+                value={description}
+                onChange={handleTextareaChange}
+                placeholder="Describe little bit about this document..."
+                className={cn(
+                  "w-full resize-none border-gray-300 focus:border-blue-500 focus:ring-blue-500 bg-white text-black placeholder-gray-400 min-h-[100px] max-h-[120px] overflow-y-auto rounded-md",
+                  descriptionValidationError && "border-red-500 focus:border-red-500"
+                )}
+                required
+                disabled={isUploading}
+                style={{
+                  height: description ? 'auto' : '100px'
+                }}
+                maxLength={200}
+              />
+              {descriptionValidationError && (
+                <p className="text-xs text-red-500 mt-1">{descriptionValidationError}</p>
+              )}
+              <div className="flex justify-between text-xs text-gray-500">
+                <span className="text-gray-500">
+                  Only text content allowed
+                </span>
+                <span className={cn(
+                  "font-medium", 
+                  description.length > 160 && "text-red-500"
+                )}>
+                  {description.length}/200
+                </span>
               </div>
             </div>
-          )}
-        </form>
-      </CardContent>
-    </Card>
+
+            {/* Upload Progress */}
+            {isUploading && (
+              <div className="space-y-3 p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-between text-sm text-gray-600">
+                  <span className="flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 text-blue-600 animate-spin" />
+                    {uploadStatus === 'success' ? 'Finalizing...' : 'Uploading...'}
+                  </span>
+                  <span>{Math.round(progress)}%</span>
+                </div>
+                <Progress 
+                  value={progress} 
+                  className="h-2 [&>div]:bg-blue-600" 
+                />
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex gap-3 pt-2">
+              <Button
+                type="submit"
+                className={cn(
+                  "flex-1 px-6 py-2.5 rounded-md",
+                  isUploading 
+                    ? "bg-gray-300 cursor-not-allowed text-gray-500" 
+                    : "bg-blue-600 hover:bg-blue-700 text-white"
+                )}
+                disabled={isUploading || !description.trim() || !docName.trim() || nameValidationError || descriptionValidationError}
+              >
+                {isUploading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    {progress > 0 ? `Uploading ${Math.round(progress)}%` : 'Uploading...'}
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4 mr-2" />
+                    Upload Document
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Success Message */}
+        {uploadStatus === 'success' && (
+          <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+            <div className="flex items-center gap-2 text-green-700">
+              <CheckCircle className="w-5 h-5" />
+              <span className="text-sm font-medium">Upload completed successfully!</span>
+            </div>
+          </div>
+        )}
+      </form>
+   
   );
 }
