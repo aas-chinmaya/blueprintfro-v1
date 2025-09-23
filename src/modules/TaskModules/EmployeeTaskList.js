@@ -108,7 +108,7 @@ const AllTasksList = () => {
     setCurrentPage(1);
   }, [searchTerm, selectedStatus, selectedPriority, tasksPerPage]);
 
-  const tasks = employeeTasks || [];
+  const tasks = employeeTasks ;
 
   // Calculate task statistics
   const taskStats = {
@@ -273,22 +273,6 @@ const isdeadlinePassed = (task) => {
     );
   }
 
-  // Error state
-  if (error) {
-    return (
-      <div className="mt-8 text-center bg-white p-6 rounded-lg shadow-md border border-gray-200">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 text-gray-800 mb-4">
-          <FiCalendar className="text-3xl" />
-        </div>
-        <h3 className="text-xl font-semibold text-gray-800 mb-2">
-          Error loading tasks
-        </h3>
-        <p className="text-gray-600 mb-6 max-w-md mx-auto">
-          {error}
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div>
@@ -436,25 +420,23 @@ const isdeadlinePassed = (task) => {
 
       {/* Tasks Table */}
       {sortedTasks.length === 0 ? (
-        <div className="mt-8 text-center bg-white p-6 rounded-lg shadow-md border border-gray-200">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 text-gray-800 mb-4">
-            <FiCalendar className="text-3xl" />
-          </div>
-          <h3 className="text-xl font-semibold text-gray-800 mb-2">No tasks found</h3>
-          <p className="text-gray-600 mb-6 max-w-md mx-auto">
-            {selectedStatus === 'all' && selectedPriority === 'all' && !searchTerm
-              ? 'You have no tasks assigned to you.'
-              : 'No tasks match your current filters. Try adjusting your search or filter criteria.'}
-          </p>
-          <Button
-            variant="outline"
-            onClick={clearFilters}
-            className="flex items-center gap-2 mx-auto border-gray-300 text-gray-800 hover:bg-gray-100"
-          >
-            <FiX />
-            Clear Filters
-          </Button>
-        </div>
+<div className="min-h-screen flex items-center justify-center bg-white p-6 rounded-lg border border-gray-200">
+  <div className="text-center rounded-lg p-6">
+    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 text-gray-800 mb-4">
+      <FiCalendar className="text-3xl" />
+    </div>
+    <h3 className="text-xl font-semibold text-gray-800 mb-2">No tasks found</h3>
+    <p className="text-gray-600 mb-0 max-w-md mx-auto">
+      {selectedStatus === 'all' && selectedPriority === 'all' && !searchTerm
+        ? 'You have no tasks assigned to you.'
+        : 'No tasks match your current filters. Try adjusting your search or filter criteria.'}
+    </p>
+  </div>
+</div>
+
+
+
+
       ) : (
         <div className="mt-0 bg-white rounded-lg shadow-md border border-gray-200">
           <Table>

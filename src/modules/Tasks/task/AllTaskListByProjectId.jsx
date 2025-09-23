@@ -36,7 +36,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { formatDateUTC } from "@/utils/formatDate";
+import { formatDateTimeIST } from "@/utils/formatDate";
 import CreateTaskModal from "./CreateTaskModal";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 
@@ -550,7 +550,7 @@ const AllTaskListByProjectId = ({ projectId, project }) => {
                       </span>
                     </TableCell>
                     <TableCell className="px-2 py-2 text-xs sm:text-base text-black">
-                      {formatDateUTC(task.deadline) || "N/A"}
+                      {formatDateTimeIST(task.deadline) || "N/A"}
                     </TableCell>
                     <TableCell className="px-2 py-2">
                       <span
@@ -611,6 +611,8 @@ const AllTaskListByProjectId = ({ projectId, project }) => {
                         )}
                       </div>
                     </TableCell>
+  
+
                   </TableRow>
                 ))
               )}
@@ -705,7 +707,7 @@ const AllTaskListByProjectId = ({ projectId, project }) => {
         )}
 
         {/* Create Task Modal */}
-        {(currentUser?.role === "cpc" || isTeamLead) && (
+        {(currentUser?.role === "cpc" ||currentUser?.position === "Team Lead"|| isTeamLead) && (
           <CreateTaskModal
             projectId={projectId}
             project={project}

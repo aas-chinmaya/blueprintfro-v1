@@ -20,3 +20,38 @@ export function formatDateUTC(dateString) {
         year: 'numeric'
     });
 }
+
+
+
+
+
+export function formatDateTimeIST(dateString) {
+  if (!dateString) return '';
+
+  const date = new Date(dateString);
+
+  return date.toLocaleString('en-GB', {
+    timeZone: 'Asia/Kolkata', // ✅ IST
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true, // shows AM/PM
+  });
+}
+
+export function formatDateTimeUTC(dateString) {
+  if (!dateString) return '';
+  return new Date(dateString).toLocaleString('en-GB', {
+    timeZone: 'UTC',
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+     second: '2-digit', 
+    hour12: true, // ✅ shows AM/PM
+  });
+}

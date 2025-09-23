@@ -27,6 +27,7 @@ import { useEffect, useState } from "react";
 import { fetchUserByEmail } from "@/features/shared/userSlice";
 import { setSidebarByRole } from "@/features/shared/sidebarSlice";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { clearProfileImageUrl ,fetchProfileImage } from "@/features/shared/profileSlice";
 
 export default function ProtectedAppShell({ children }) {
   const [showProfile, setShowProfile] = useState(false);
@@ -41,7 +42,7 @@ useEffect(() => {
 }, [dispatch]);
 
 const {currentUser}=useCurrentUser()
-// console.log("currentUser role", currentUser?.position)
+
 const recipientId = currentUser?.id; // Fallback to a default ID if employeeData is not available
 const navMainItems = useSelector((state) => state.sidebar.navItems);
 
@@ -52,11 +53,7 @@ const navMainItems = useSelector((state) => state.sidebar.navItems);
     return path.charAt(0).toUpperCase() + path.slice(1);
   };
 
-// useEffect(() => {
-//   if (currentUser?.role) {
-//     dispatch(setSidebarByRole(currentUser?.role.toLowerCase()));
-//   }
-// }, [currentUser?.role, dispatch]);
+
 
 useEffect(() => {
     if (currentUser?.role && currentUser?.position) {
@@ -68,6 +65,23 @@ useEffect(() => {
       );
     }
   }, [currentUser?.role, currentUser?.position, dispatch]);
+
+
+
+
+//TO BE DELETED
+  const { profileImageUrl } = useSelector((state) => state.profile);
+
+  const fallbackChar = currentUser?.fullName ? currentUser.fullName.charAt(0).toUpperCase() : "U";
+  
+
+  useEffect(() => {
+      if (currentUser?.id) {
+          dispatch(fetchProfileImage(currentUser?.id));
+        }
+        return () => dispatch(clearProfileImageUrl());
+    }, [currentUser?.id, dispatch]);
+
 
   return (
     
@@ -101,19 +115,34 @@ useEffect(() => {
                 >
            
                   <Avatar>
-                    <AvatarImage
+                    {
+                      profileImageUrl?(
+
+                        <AvatarImage
+                          src={
+                            profileImageUrl
+                          }
+                          alt={user?.name || "User"}
+                        />
+                      ):(
+
+                        <AvatarFallback>{currentUser.fullName?.charAt(0) || "U"}</AvatarFallback>
+                      )
+                    }
+                    {/* <AvatarImage
                       src={
                         typeof user?.image === "string"
                           ? user.image
-                          : "/images/Avatar.png"
+                          : "/images/Avatars.png"
                       }
                       alt={user?.name || "User"}
-                    />
-                    <AvatarFallback>{currentUser.fullName?.charAt(0) || "U"}</AvatarFallback>
+                    /> */}
                   </Avatar>
+                  
                 </Button>
               </div>
               <ProfileSheet
+              user={currentUser}
                 open={showProfile}
                 onClose={() => setShowProfile(false)}
               />
@@ -129,3 +158,9 @@ useEffect(() => {
     
   );
 }
+
+
+
+
+
+

@@ -26,7 +26,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { formatDateUTC } from "@/utils/formatDate";
+import { formatDateTimeIST } from "@/utils/formatDate";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import BugDetailsViewModal from "./BugDetailsViewModal";
 
@@ -108,17 +108,7 @@ const ProjectWiseBugList = ({ projectId, project, teamLeadId }) => {
       setViewMode("my");
     }
   }, [showAllViewOption]);
-  
-  // let bugs = [];
 
-
-  // if (isCpc || (isTeamLead && viewMode === "all")) {
-  //   bugs = bugsByProjectId || [];
-  // } else if (viewMode === "my") {
-  //   bugs = employeeProjectBugs || [];
-  // } else {
-  //   bugs = bugsByProjectId || [];
-  // }
 
 const bugs = useMemo(() => {
   if (isCpc || (isTeamLead && viewMode === "all")) {
@@ -507,7 +497,7 @@ const bugs = useMemo(() => {
                     onClick={() => col.key && handleSort(col.key)}
                   >
                     {col.label}
-                    {sortConfig.key === col.key && (sortConfig.direction === "asc" ? " ▲" : " ▼")}
+                    {sortConfig.key === col.key && (sortConfig.direction === "asc" ? " " : " ")}
                   </TableHead>
                 ))}
               </TableRow>
@@ -547,7 +537,7 @@ const bugs = useMemo(() => {
                       </span>
                     </TableCell>
                     <TableCell className="px-2 py-2 text-xs sm:text-base text-black">
-                      {formatDateUTC(bug.deadline) || "N/A"}
+                      {formatDateTimeIST(bug.deadline) || "N/A"}
                     </TableCell>
                     <TableCell className="px-2 py-2">
                       <span

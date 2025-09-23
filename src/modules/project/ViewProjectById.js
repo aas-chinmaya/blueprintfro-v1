@@ -25,8 +25,6 @@ import {
 } from "react-icons/fi";
 import { Briefcase, TrendingUp, FileStack, BugIcon, CheckCircle, Pencil, Dock } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-// import ViewTeamByProjectId from "@/modules/team/viewTeamByProjectId";
-// import CreateTeamForm from "@/modules/team/createTeam";
 import AllTaskListByProjectId from "@/modules/Tasks/task/AllTaskListByProjectId";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -48,7 +46,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
+
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 // import TeamMeetingCreateForm from "../meetings/team-meetings/TeamMeetingCreateForm";
 // import ProjectWiseTeamMeet from "../meetings/team-meetings/ProjectWiseTeamMeet";
@@ -67,18 +65,13 @@ export default function ViewProjectById({ projectId }) {
 
   const router = useRouter();
 
-  //gsefg
+
 const searchParams = useSearchParams();
   
-  const initialTab = searchParams.get('tab') || 'details';
+  const initialTab = searchParams.get('tab') || 'detail';
   const [activeTab, setActiveTab] = useState(initialTab);
 
-  // useEffect(() => {
-  //   if (activeTab !== initialTab) {
-  //     // Update URL without refreshing the page
-  //     router.replace(`/project/${projectId}?tab=${activeTab}`);
-  //   }
-  // }, [activeTab, projectId, router]);
+
 
 
   useEffect(() => {
@@ -166,10 +159,15 @@ const searchParams = useSearchParams();
 
   const tabs = [
     {
-      id: "detail",
+      id: "details",
       label: "Detail's",
       icon: <FiInfo className="h-5 w-5" />,
     },
+    // {
+    //   id: "overview",
+    //   label: "Overview",
+    //   icon: <FiInfo className="h-5 w-5" />,
+    // },
     {
       id: "team",
       label: "Team",
@@ -285,7 +283,7 @@ const canEditStatus = currentUser?.role?.toLowerCase() === "cpc" || isTeamLead |
               ))}
             </TabsList>
 
-            <TabsContent value="detail" className="min-h-[calc(100vh-200px)]">
+            <TabsContent value="details" className="min-h-[calc(100vh-200px)]">
               <div className="space-y-6">
                 <div className="space-y-4 pb-3">
                   <div className="flex items-center justify-between">
@@ -397,8 +395,8 @@ const canEditStatus = currentUser?.role?.toLowerCase() === "cpc" || isTeamLead |
                     </div>
                     <div className="flex items-center gap-3">
                       <FiCalendar className="h-4 w-4 text-[#38b000]" />
-                      <span className="font-semibold text-gray-900 w-28">
-                        Created At:
+                      <span className="font-semibold text-gray-900 w-30">
+                        Onboarding Date:
                       </span>
                       <span>
                         {project.data.createdAt

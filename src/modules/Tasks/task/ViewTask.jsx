@@ -39,7 +39,7 @@ import {
   updateTaskStatus,
   updateTaskReviewStatus,
 } from "@/features/taskSlice";
-import { formatDateUTC } from "@/utils/formatDate";
+import { formatDateTimeIST, formatDateUTC } from "@/utils/formatDate";
 import { Button } from "@/components/ui/button";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { toast } from "sonner";
@@ -418,7 +418,7 @@ const TaskView = () => {
                           <Mail className="h-5 w-5 text-slate-500" />
                           <div>
                             <div className="text-xs text-slate-500">Deadline</div>
-                            <div className="font-medium">{formatDateUTC(task?.deadline) || "N/A"}</div>
+                            <div className="font-medium">{formatDateTimeIST(task?.deadline) || "N/A"}</div>
                           </div>
                         </div>
                       </div>

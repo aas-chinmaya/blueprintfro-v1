@@ -47,6 +47,7 @@ import projectMeetingsReducer from "@/features/projetMeetingSlice"
 
 
 import projectMeetReducer from "@/features/projectmeetSlice"
+import profileReducer from "@/features/shared/profileSlice"
 
 
 import projectMeetingMomReducer from '@/features/projectmeetingmomSlice'; // Adjust path as needed
@@ -98,6 +99,7 @@ export const store = configureStore({
 
   payment: paymentReducer,
   documents: documentReducer,
+  profile: profileReducer,
 
   //master
   slots: slotReducer,

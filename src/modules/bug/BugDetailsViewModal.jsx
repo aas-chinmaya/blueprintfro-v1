@@ -321,7 +321,7 @@
 "use client";
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { formatDateUTC } from "@/utils/formatDate";
+import { formatDateTimeIST, formatDateUTC } from "@/utils/formatDate";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useDispatch, useSelector } from "react-redux";
 import { resolveBug, clearErrors, fetchBugByEmployeeId } from "@/features/bugSlice";
@@ -422,11 +422,11 @@ const BugDetailsViewModal = ({ isOpen, onOpenChange, bug }) => {
     const nowISO = now.toISOString();
     
     // Log for debugging
-    if (isOverdue) {
-      console.log(`Deadline passed! Deadline: ${bugDeadlineISO}, Current: ${nowISO}`);
-    } else {
-      console.log(`Deadline not yet passed. Deadline: ${bugDeadlineISO}, Current: ${nowISO}`);
-    }
+    // if (isOverdue) {
+    //   console.log(`Deadline passed! Deadline: ${bugDeadlineISO}, Current: ${nowISO}`);
+    // } else {
+    //   console.log(`Deadline not yet passed. Deadline: ${bugDeadlineISO}, Current: ${nowISO}`);
+    // }
   }
 
   return (
@@ -475,10 +475,13 @@ const BugDetailsViewModal = ({ isOpen, onOpenChange, bug }) => {
               </Label>
               <div className="flex items-center gap-2">
                 <p className="text-xs text-black p-2">
-                  {formatDateUTC(bug.deadline) || "N/A"}
+                  {formatDateTimeIST(bug.deadline) || "N/A"}
+
+
                 </p>
                 {/* Overdue indicator */}
-                {isOverdue && (
+              
+                {isOverdue && bug?.status!=="Resolved" &&(
                   <span className="px-2 py-1 rounded-full bg-red-100 text-red-600 text-xs font-medium flex items-center gap-1">
                     <AlertCircle className="h-3 w-3" />
                     Overdue
@@ -517,7 +520,7 @@ const BugDetailsViewModal = ({ isOpen, onOpenChange, bug }) => {
                 <ClockIcon className="h-3 w-3" />
                 Created At
               </Label>
-              <p className="text-xs text-black p-2">{formatDateUTC(bug.createdAt)}</p>
+              <p className="text-xs text-black p-2">{formatDateTimeIST(bug.createdAt)}</p>
             </div>
           )}
 
@@ -625,7 +628,7 @@ const BugDetailsViewModal = ({ isOpen, onOpenChange, bug }) => {
           {!isResolved && isAssignedToCurrentUser && (
             <Button
               onClick={handleResolveBug}
-              className="bg-black text-white hover:bg-gray-800 font-semibold"
+              className="bg-blue-700 text-white hover:bg-blue-700 font-semibold"
               disabled={loading}
             >
               {loading ? (

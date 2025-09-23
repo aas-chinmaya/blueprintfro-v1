@@ -268,23 +268,13 @@ export const getAllTaskByEmployeeId = createAsyncThunk(
   'task/getAllTaskByEmployeeId',
   async (employeeId, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get(`/task/member/${employeeId}`, {
-        timeout: 5000,
-        validateStatus: (status) => status >= 200 && status < 500,
-      });
+      const response = await axiosInstance.get(`/task/member/${employeeId}`);
 
-      if (!response.data) {
-        throw new Error('No tasks found for the employee');
-      }
+    
 
       return response.data.data;
     } catch (error) {
-      if (error.code === 'ECONNABORTED') {
-        return rejectWithValue('Request timeout - Server is not responding');
-      }
-      if (!error.response) {
-        return rejectWithValue('Network error - Unable to connect to server');
-      }
+   
       return rejectWithValue(
         error.response?.data?.message || error.message || 'Failed to fetch tasks for employee'
       );
