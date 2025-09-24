@@ -58,6 +58,7 @@ import { formatDateUTC } from "@/utils/formatDate";
 
 import TeamManagement from "../Teams/TeamManagement";
 import DocumentManager from "../document/project-doc/DocumentManager";
+import ProjectOverview from "./ProjectOverview";
 
 export default function ViewProjectById({ projectId }) {
 
@@ -68,7 +69,7 @@ export default function ViewProjectById({ projectId }) {
 
 const searchParams = useSearchParams();
   
-  const initialTab = searchParams.get('tab') || 'detail';
+  const initialTab = searchParams.get('tab') || 'details';
   const [activeTab, setActiveTab] = useState(initialTab);
 
 
@@ -159,15 +160,15 @@ const searchParams = useSearchParams();
 
   const tabs = [
     {
+      id: "overview",
+      label: "Overview",
+      icon: <FiInfo className="h-5 w-5" />,
+    },
+    {
       id: "details",
       label: "Detail's",
       icon: <FiInfo className="h-5 w-5" />,
     },
-    // {
-    //   id: "overview",
-    //   label: "Overview",
-    //   icon: <FiInfo className="h-5 w-5" />,
-    // },
     {
       id: "team",
       label: "Team",
@@ -545,6 +546,15 @@ const canEditStatus = currentUser?.role?.toLowerCase() === "cpc" || isTeamLead |
 
 
                 <DocumentManager project={project.data} projectId={projectId} teamLeadId={project?.data?.teamLeadId} />
+              </div>
+            </TabsContent>
+
+
+            <TabsContent value="overview" className="min-h-[calc(100vh-200px)]">
+              <div className="space-y-4">
+
+
+                <ProjectOverview project={project.data} projectId={projectId} teamLeadId={project?.data?.teamLeadId} />
               </div>
             </TabsContent>
 

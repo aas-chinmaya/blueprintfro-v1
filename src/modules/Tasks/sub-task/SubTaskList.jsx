@@ -1,3 +1,6 @@
+
+
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -20,31 +23,18 @@ import {
   ChevronRight,
   Lock,
   ListTodo,
-  RotateCw,
 } from "lucide-react";
 import CreateSubtaskModal from "@/modules/Tasks/sub-task/CreateSubTaskModal";
 import EditSubtaskModal from "@/modules/Tasks/sub-task/EditSubTaskModal";
 import DeleteSubtaskModal from "@/modules/Tasks/sub-task/DeleteSubTaskModal";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  fetchSubTasksByTaskId,
-  updateSubTaskStatus,
-} from "@/features/subTaskSlice";
-import { toast } from "sonner";
+import { fetchSubTasksByTaskId } from "@/features/subTaskSlice";
 import { useRouter } from "next/navigation";
 import { formatDateUTC } from "@/utils/formatDate";
 
-const SubTaskList = ({ task, taskId, projectId,isTaskClosed }) => {
+const SubTaskList = ({ task, taskId, projectId, isTaskClosed }) => {
   const router = useRouter();
   const dispatch = useDispatch();
   const { subtasks, loading, error } = useSelector((state) => state.subTask);
-
-  
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -57,17 +47,15 @@ const SubTaskList = ({ task, taskId, projectId,isTaskClosed }) => {
     indexOfFirstSubtask,
     indexOfLastSubtask
   );
+
   // Fetch subtasks on mount and when taskId changes
   useEffect(() => {
     if (taskId) {
       dispatch(fetchSubTasksByTaskId(taskId));
     }
-  }, [dispatch,subtasks?.length, taskId]);
-
-
+  }, [dispatch, subtasks?.length, taskId]);
 
   // Modal states
-  const [openView, setOpenView] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [openAdd, setOpenAdd] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
@@ -82,44 +70,9 @@ const SubTaskList = ({ task, taskId, projectId,isTaskClosed }) => {
       ? (completedSubtasks / safeSubtasks.length) * 100
       : 0;
 
-  // Get next status in cycle: Pending -> In Progress -> Completed -> Pending
-  const getNextStatus = (current) => {
-    if (current === "Pending") return "In Progress";
-    if (current === "In Progress") return "Completed";
-    if (current === "Completed") return "Pending";
-    return "Pending"; // Fallback
-  };
-
-  // Get tooltip text for the toggle action
-  const getToggleTooltip = (current) => {
-    if (current === "Pending") return "Start Progress";
-    if (current === "In Progress") return "Mark as Completed";
-    if (current === "Completed") return "Reopen Subtask";
-    return "Toggle Status"; // Fallback
-  };
-
-  // Handle status toggle
-  const handleToggleStatus = async (subtask) => {
-    if (isTaskClosed) return;
-    const nextStatus = getNextStatus(subtask?.status);
-    try {
-      await dispatch(
-        updateSubTaskStatus({
-          taskId,
-          subtaskId: subtask.subtask_id,
-          status: nextStatus,
-        })
-      );
-      toast.success(`Subtask status updated to ${nextStatus}`);
-    } catch (err) {
-      toast.error("Failed to update subtask status");
-    }
-  };
-
   // Handlers
   const handleView = (subtask) => {
-    setSelectedSubtask(subtask);
-    setOpenView(true);
+    router.push(`/task/${taskId}/${subtask.subtask_id}`);
   };
 
   const handleEdit = (subtask) => {
@@ -151,8 +104,6 @@ const SubTaskList = ({ task, taskId, projectId,isTaskClosed }) => {
     if (status === "In Progress") return "warning";
     return "secondary"; // For Pending
   };
-
- 
 
   return (
     <section>
@@ -197,7 +148,6 @@ const SubTaskList = ({ task, taskId, projectId,isTaskClosed }) => {
           Loading subtasks...
         </div>
       )}
-    
       {!loading && !error && safeSubtasks.length === 0 && (
         <div className="text-center text-sm text-gray-500">
           No subtasks available
@@ -223,6 +173,7 @@ const SubTaskList = ({ task, taskId, projectId,isTaskClosed }) => {
                 <span className="font-medium text-xs sm:text-sm">
                   {st.title}
                 </span>
+                
               </div>
               <div className="flex items-center gap-1 sm:gap-2">
                 <Badge
@@ -246,22 +197,6 @@ const SubTaskList = ({ task, taskId, projectId,isTaskClosed }) => {
                 </Tooltip>
                 {!isTaskClosed && (
                   <>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleToggleStatus(st)}
-                          disabled={isTaskClosed}
-                          className="h-7 w-7 sm:h-8 sm:w-8"
-                        >
-                          <RotateCw className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        {getToggleTooltip(st.status)}
-                      </TooltipContent>
-                    </Tooltip>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
@@ -321,75 +256,6 @@ const SubTaskList = ({ task, taskId, projectId,isTaskClosed }) => {
             <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
         </div>
-      )}
-
-      {/* View Subtask Modal */}
-      {selectedSubtask && (
-        <Dialog open={openView} onOpenChange={setOpenView}>
-          <DialogContent className="flex flex-col justify-between max-h-[80vh]">
-            <DialogHeader>
-              <DialogTitle className="flex items-center">
-                <Eye className="mr-2 h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
-                View Subtask
-              </DialogTitle>
-            </DialogHeader>
-
-            {/* Main Content */}
-            <div className="space-y-3 overflow-y-auto">
-              <div>
-                <span className="font-medium text-xs sm:text-sm">Title:</span>
-                <p className="mt-1 text-xs sm:text-sm">
-                  {selectedSubtask.title}
-                </p>
-              </div>
-              <div>
-                <span className="font-medium text-xs sm:text-sm">
-                  Description:
-                </span>
-                <p className="mt-1 text-xs sm:text-sm">
-                  {selectedSubtask.description || "N/A"}
-                </p>
-              </div>
-              <div>
-                <span className="font-medium text-xs sm:text-sm">
-                  Priority:
-                </span>
-                <p className="mt-1 text-xs sm:text-sm">
-                  {selectedSubtask.priority}
-                </p>
-              </div>
-              <div>
-                <span className="font-medium text-xs sm:text-sm">
-                  Deadline:
-                </span>
-                <p className="mt-1 text-xs sm:text-sm">
-                  {formatDateUTC(selectedSubtask.deadline) || "N/A"}
-                </p>
-              </div>
-              <div>
-                <span className="font-medium text-xs sm:text-sm">Status:</span>
-                <Badge
-                  variant={getStatusVariant(selectedSubtask.status)}
-                  className="ml-2 text-xs sm:text-sm"
-                >
-                  {selectedSubtask.status}
-                </Badge>
-              </div>
-            </div>
-
-            {/* Button at the bottom */}
-            <div className="mt-4 flex justify-end">
-              <button
-                onClick={() =>
-                  router.push(`/task/${taskId}/${selectedSubtask?.subtask_id}`)
-                }
-                className="cursor-pointer px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-xs sm:text-sm"
-              >
-                View Full Details
-              </button>
-            </div>
-          </DialogContent>
-        </Dialog>
       )}
 
       {/* Create, Edit, Delete Modals */}

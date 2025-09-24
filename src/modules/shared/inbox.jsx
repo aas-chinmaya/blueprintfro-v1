@@ -44,6 +44,7 @@ export default function Inbox({ recipientId }) {
     }
   }, [dispatch, recipientId]);
 
+
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   const handleMarkAllAsRead = () => {
@@ -92,7 +93,7 @@ export default function Inbox({ recipientId }) {
   return (
     <div className="flex h-screen w-full bg-background">
       {/* Left Side: Notification List - Full width on mobile, 1/4 on large screens */}
-      <div className="w-full md:w-1/4 border-r bg-muted/10 p-4 flex flex-col">
+      <div className="w-full md:w-1/4 border-r bg-muted/10 p-1 flex flex-col">
         <div className="flex justify-between items-center border-b pb-2 mb-4">
           <h4 className="font-semibold text-lg">
             Notifications{" "}
@@ -315,3 +316,7 @@ export default function Inbox({ recipientId }) {
     </div>
   );
 }
+
+
+
+

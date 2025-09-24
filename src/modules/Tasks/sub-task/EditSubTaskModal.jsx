@@ -1,86 +1,7 @@
-// import { useState } from 'react';
-// import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
-// import { Button } from '@/components/ui/button';
-// import { Input } from '@/components/ui/input';
-// import { Edit } from 'lucide-react';
-
-// const EditSubtaskModal = ({projectId, open, setOpen, subtask, subtasks, setSubtasks, isTaskClosed }) => {
-//   const [editTitle, setEditTitle] = useState(subtask.title);
-//   const [editStatus, setEditStatus] = useState(subtask.status);
-
-//   const handleSaveEdit = () => {
-//     if (isTaskClosed) return;
-//     setSubtasks(
-//       subtasks.map((st) =>
-//         st.id === subtask.id ? { ...st, title: editTitle, status: editStatus } : st
-//       )
-//     );
-//     setOpen(false);
-//     alert('Subtask edited');
-//   };
-
-//   return (
-//     <Dialog open={open} onOpenChange={setOpen}>
-//       <DialogContent>
-//         <DialogHeader>
-//           <DialogTitle className="flex items-center">
-//             <Edit className="mr-2 h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
-//             Edit Subtask
-//           </DialogTitle>
-//         </DialogHeader>
-//         <div className="space-y-3">
-//           <div>
-//             <span className="font-medium text-xs sm:text-sm">Title:</span>
-//             <Input
-//               value={editTitle}
-//               onChange={(e) => setEditTitle(e.target.value)}
-//               className="mt-1 text-xs sm:text-sm"
-//               disabled={isTaskClosed}
-//             />
-//           </div>
-//           <div>
-//             <span className="font-medium text-xs sm:text-sm">Status:</span>
-//             <select
-//               className="w-full p-2 border rounded bg-background text-foreground mt-1 text-xs sm:text-sm"
-//               value={editStatus}
-//               onChange={(e) => setEditStatus(e.target.value)}
-//               disabled={isTaskClosed}
-//             >
-//               <option>Open</option>
-//               <option>Closed</option>
-//             </select>
-//           </div>
-//           <DialogClose asChild>
-//             <Button
-//               onClick={handleSaveEdit}
-//               disabled={isTaskClosed}
-//               className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm h-8 sm:h-9"
-//             >
-//               Save Changes
-//             </Button>
-//           </DialogClose>
-//         </div>
-//       </DialogContent>
-//     </Dialog>
-//   );
-// };
-
-// export default EditSubtaskModal;
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 'use client';
+import { Input } from '@/components/ui/input';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -91,7 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
-import { Edit, User, Flag, CalendarIcon, Info, X, Loader } from 'lucide-react';
+import { Edit, User, Flag, CalendarIcon, Info, X, Loader, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { updateSubTask } from '@/features/subTaskSlice';
@@ -106,11 +27,10 @@ const EditSubtaskModal = ({ projectId, open, setOpen, subtask, taskId }) => {
   const { teamsByProject: teams, status: teamStatus } = useSelector((state) => state.team);
   const { loading: subTaskLoading, error: subTaskError } = useSelector((state) => state.subTask);
 
-  // Initial state - removed status
+  // Initial state
   const initialFormData = useMemo(() => ({
     title: subtask?.title || '',
     priority: subtask?.priority || 'Medium',
-    deadline: subtask?.deadline || '',
     description: subtask?.description || '',
     assignedTo: subtask?.assignedTo || '',
     assignedBy: subtask?.assignedBy || currentUser?.id || '',
@@ -123,7 +43,8 @@ const EditSubtaskModal = ({ projectId, open, setOpen, subtask, taskId }) => {
   const [errors, setErrors] = useState({});
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
-  const [memberSearchQuery, setMemberSearchQuery] = useState("");
+  const [selectedTime, setSelectedTime] = useState('');
+  const [memberSearchQuery, setMemberSearchQuery] = useState('');
   const [memberOpen, setMemberOpen] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -135,7 +56,7 @@ const EditSubtaskModal = ({ projectId, open, setOpen, subtask, taskId }) => {
     }
   }, [dispatch, projectId, isInitialized]);
 
-  // Reset form when modal opens with new subtask data
+  // Initialize form when modal opens with subtask data
   useEffect(() => {
     if (open && subtask) {
       setFormData(initialFormData);
@@ -145,11 +66,20 @@ const EditSubtaskModal = ({ projectId, open, setOpen, subtask, taskId }) => {
       const team = teams.find(t => t.teamId === subtask.teamId);
       setSelectedTeam(team || null);
       
-      // Set selected date from subtask data
-      setSelectedDate(subtask.deadline ? new Date(subtask.deadline) : null);
+      // Set selected date and time from subtask deadline
+      if (subtask.deadline) {
+        const deadline = new Date(subtask.deadline);
+        setSelectedDate(deadline);
+        // Extract time in HH:mm format
+        const hours = deadline.getHours().toString().padStart(2, '0');
+        const minutes = deadline.getMinutes().toString().padStart(2, '0');
+        setSelectedTime(`${hours}:${minutes}`);
+      } else {
+        setSelectedDate(null);
+        setSelectedTime('');
+      }
       
-      // Set member search query to empty to show existing member
-      setMemberSearchQuery("");
+      setMemberSearchQuery('');
       setMemberOpen(false);
     }
   }, [open, subtask, initialFormData, teams]);
@@ -159,13 +89,12 @@ const EditSubtaskModal = ({ projectId, open, setOpen, subtask, taskId }) => {
     if (team) {
       setFormData((prev) => ({
         ...prev,
-        assignedBy: currentUser?.name || "Current User",
+        assignedBy: currentUser?.name || 'Current User',
         projectId: projectId || '',
         teamId: team.teamId || '',
-        // Keep existing assignedTo when team changes
         assignedTo: subtask?.assignedTo || formData.assignedTo || '',
       }));
-      setMemberSearchQuery(""); // Reset search query
+      setMemberSearchQuery('');
     }
   }, [projectId, currentUser?.name, subtask?.assignedTo, formData.assignedTo]);
 
@@ -204,26 +133,22 @@ const EditSubtaskModal = ({ projectId, open, setOpen, subtask, taskId }) => {
     return null;
   }, [formData.teamId, teams]);
 
-  // Find existing member name for display - Show existing member info by default
+  // Find existing member name for display
   const existingMember = useMemo(() => {
-    // First, try to find member from the currently selected team
-    if (selectedTeam?.teamMembers && formData.assignedTo && selectedTeam.teamId === formData.teamId) {
-      return selectedTeam.teamMembers.find(member => member.memberId === formData.assignedTo);
-    }
-    
-    // If no team selected but we have assignedTo, try to find from any team
-    if (formData.assignedTo && !selectedTeam) {
-      // Search across all teams to find the member
+    if (formData.assignedTo) {
+      // Try to find member in the selected team
+      if (selectedTeam?.teamMembers && selectedTeam.teamId === formData.teamId) {
+        const member = selectedTeam.teamMembers.find(member => member.memberId === formData.assignedTo);
+        if (member) return member;
+      }
+      // If no selected team or member not in selected team, search across all teams
       for (const team of teams) {
         const member = team.teamMembers?.find(member => member.memberId === formData.assignedTo);
-        if (member) {
-          return member;
-        }
+        if (member) return member;
       }
     }
-    
     return null;
-  }, [selectedTeam?.teamMembers, formData.assignedTo, selectedTeam?.teamId, formData.teamId, teams]);
+  }, [selectedTeam?.teamMembers, selectedTeam?.teamId, formData.assignedTo, formData.teamId, teams]);
 
   const handleChange = useCallback((e) => {
     const { name, value } = e.target;
@@ -243,26 +168,30 @@ const EditSubtaskModal = ({ projectId, open, setOpen, subtask, taskId }) => {
 
   const handleMemberSelect = useCallback((value) => {
     const member = teamMemberOptions.find((opt) => opt.value === value);
-    handleSelectChange("assignedTo", value);
-    handleSelectChange("memberId", member?.memberId || "");
+    handleSelectChange('assignedTo', value);
+    handleSelectChange('memberId', member?.memberId || '');
     setMemberOpen(false);
   }, [teamMemberOptions, handleSelectChange]);
 
   const handleTeamSelect = useCallback((value) => {
-    const team = teams.find((t) => t.teamId === value);
-    setSelectedTeam(team);
-    handleSelectChange("teamId", value);
-    
-    // Keep existing assignedTo when team changes, but validate if member exists in new team
-    if (team && formData.assignedTo) {
-      const memberExistsInNewTeam = team.teamMembers?.some(member => member.memberId === formData.assignedTo);
-      if (!memberExistsInNewTeam) {
-        // If member doesn't exist in new team, clear it
-        setFormData(prev => ({ ...prev, assignedTo: '', memberId: '' }));
+    if (value) {
+      const team = teams.find((t) => t.teamId === value);
+      setSelectedTeam(team);
+      handleSelectChange('teamId', value);
+      
+      if (team && formData.assignedTo) {
+        const memberExistsInNewTeam = team.teamMembers?.some(member => member.memberId === formData.assignedTo);
+        if (!memberExistsInNewTeam) {
+          setFormData(prev => ({ ...prev, assignedTo: '', memberId: '' }));
+        }
       }
+    } else {
+      // Handle clearing team selection
+      setSelectedTeam(null);
+      handleSelectChange('teamId', '');
+      // Clear assignedTo if no team is selected, as member selection requires a team
+      setFormData(prev => ({ ...prev, assignedTo: '', memberId: '' }));
     }
-    
-    setErrors((prev) => ({ ...prev, team: '' }));
   }, [teams, handleSelectChange, formData.assignedTo]);
 
   const validate = useCallback(() => {
@@ -271,12 +200,11 @@ const EditSubtaskModal = ({ projectId, open, setOpen, subtask, taskId }) => {
     if (!formData.priority.trim()) newErrors.priority = 'Priority is required';
     if (!selectedDate) newErrors.deadline = 'Deadline is required';
     if (!formData.description.trim()) newErrors.description = 'Description is required';
-    if (!selectedTeam) newErrors.team = 'Team selection is required';
     if (!formData.assignedTo) newErrors.assignedTo = 'Assigned To is required';
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }, [formData.title, formData.priority, formData.description, selectedDate, selectedTeam, formData.assignedTo]);
+  }, [formData.title, formData.priority, formData.description, selectedDate, formData.assignedTo]);
 
   const handleSaveEdit = useCallback(async () => {
     if (!validate()) {
@@ -285,39 +213,81 @@ const EditSubtaskModal = ({ projectId, open, setOpen, subtask, taskId }) => {
     }
 
     try {
+      // Combine date and time into ISO string - time is optional
+      function pad(n) {
+        return n < 10 ? '0' + n : n;
+      }
+
+      let combinedDateTime;
+      if (selectedDate) {
+        const dateObj = new Date(selectedDate);
+        const [hours, minutes] = selectedTime
+          ? selectedTime.split(':').map(Number)
+          : [23, 59]; // Default to end of day if no time provided
+
+        dateObj.setHours(hours, minutes, 0, 0);
+
+        combinedDateTime =
+          dateObj.getFullYear() +
+          '-' +
+          pad(dateObj.getMonth() + 1) +
+          '-' +
+          pad(dateObj.getDate()) +
+          'T' +
+          pad(dateObj.getHours()) +
+          ':' +
+          pad(dateObj.getMinutes()) +
+          ':' +
+          pad(dateObj.getSeconds());
+      }
+
       const subTaskData = {
         title: formData.title,
         priority: formData.priority,
-        deadline: selectedDate ? format(selectedDate, 'yyyy-MM-dd') : '',
+        deadline: combinedDateTime, // e.g., "2025-09-23T14:30:00"
         description: formData.description,
         assignedTo: formData.assignedTo,
         assignedBy: formData.assignedBy,
-        teamId: selectedTeam.teamId,
+        teamId: selectedTeam?.teamId || formData.teamId || '', // Optional teamId
         memberId: formData.memberId,
+        projectId: formData.projectId,
       };
 
-   
-      
-      await dispatch(updateSubTask({ taskId, subTaskId: subtask.subtask_id, subTaskData }));
+      await dispatch(updateSubTask({ taskId, subTaskId: subtask.subtask_id, subTaskData })).unwrap();
       toast.success('Subtask updated successfully');
       setOpen(false);
     } catch (err) {
       toast.error(subTaskError || 'Failed to update subtask');
     }
-  }, [validate, formData, selectedDate, selectedTeam, dispatch, taskId, subtask.id, subTaskError, setOpen]);
+  }, [
+    validate,
+    formData,
+    selectedDate,
+    selectedTime,
+    selectedTeam,
+    dispatch,
+    taskId,
+    subtask?.subtask_id,
+    subTaskError,
+    setOpen,
+  ]);
 
   const isButtonEnabled = useMemo(() => 
     formData.title.trim() &&
     formData.priority.trim() &&
     selectedDate &&
     formData.description.trim() &&
-    selectedTeam &&
     formData.assignedTo
-  , [formData.title, formData.priority, formData.description, selectedDate, selectedTeam, formData.assignedTo]);
+  , [formData.title, formData.priority, formData.description, selectedDate, formData.assignedTo]);
 
   const handleClose = useCallback(() => {
     setOpen(false);
   }, [setOpen]);
+
+  // Display date and time
+  const displayDateTime = selectedDate
+    ? format(selectedDate, 'MMM dd, yyyy') + (selectedTime ? ` at ${selectedTime}` : ' (End of Day)')
+    : '';
 
   if (!open) return null;
 
@@ -347,7 +317,7 @@ const EditSubtaskModal = ({ projectId, open, setOpen, subtask, taskId }) => {
         {/* Body */}
         <div className="p-4 sm:p-6 overflow-y-auto max-h-[calc(85vh-60px)]">
           <form onSubmit={(e) => { e.preventDefault(); handleSaveEdit(); }} className="space-y-4">
-            {/* Full Width Subtask Title Section - Textarea */}
+            {/* Subtask Title */}
             <div className="w-full">
               <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
                 <Edit className="h-4 w-4 text-blue-500 mr-2" />
@@ -360,12 +330,14 @@ const EditSubtaskModal = ({ projectId, open, setOpen, subtask, taskId }) => {
                 className="w-full h-24 sm:h-28 md:h-32 bg-white border border-gray-300 rounded-lg text-sm resize-vertical focus:ring-2 focus:ring-blue-200 focus:border-blue-500 p-3"
                 placeholder="Enter subtask title..."
               />
-              {errors.title && <p className="text-red-500 text-xs mt-1 flex items-center">
-                <X className="h-3 w-3 mr-1" /> {errors.title}
-              </p>}
+              {errors.title && (
+                <p className="text-red-500 text-xs mt-1 flex items-center">
+                  <X className="h-3 w-3 mr-1" /> {errors.title}
+                </p>
+              )}
             </div>
 
-            {/* Responsive Grid Layout - 2 columns on md+, 1 column on mobile - REMOVED STATUS */}
+            {/* Grid Layout */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Priority */}
               <div>
@@ -383,9 +355,11 @@ const EditSubtaskModal = ({ projectId, open, setOpen, subtask, taskId }) => {
                     <SelectItem value="High">High</SelectItem>
                   </SelectContent>
                 </Select>
-                {errors.priority && <p className="text-red-500 text-xs mt-1 flex items-center">
-                  <X className="h-3 w-3 mr-1" /> {errors.priority}
-                </p>}
+                {errors.priority && (
+                  <p className="text-red-500 text-xs mt-1 flex items-center">
+                    <X className="h-3 w-3 mr-1" /> {errors.priority}
+                  </p>
+                )}
               </div>
 
               {/* Deadline */}
@@ -399,11 +373,11 @@ const EditSubtaskModal = ({ projectId, open, setOpen, subtask, taskId }) => {
                     <Button
                       variant="outline"
                       className={cn(
-                        "w-full justify-between bg-white border border-gray-300 rounded-lg text-sm hover:bg-gray-100 focus:ring-2 focus:ring-blue-200 focus:border-blue-500 h-10",
-                        !selectedDate && "text-gray-500"
+                        'w-full justify-between bg-white border border-gray-300 rounded-lg text-sm hover:bg-gray-100 focus:ring-2 focus:ring-blue-200 focus:border-blue-500 h-10',
+                        !selectedDate && 'text-gray-500'
                       )}
                     >
-                      {selectedDate ? format(selectedDate, "MMM dd, yyyy") : "Select date"}
+                      {displayDateTime || 'Select date'}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="bg-white border border-gray-200 rounded-lg shadow-lg p-0 w-auto">
@@ -412,7 +386,6 @@ const EditSubtaskModal = ({ projectId, open, setOpen, subtask, taskId }) => {
                       selected={selectedDate}
                       onSelect={(date) => {
                         setSelectedDate(date);
-                        handleSelectChange("deadline", date ? format(date, "yyyy-MM-dd") : "");
                         setErrors((prev) => ({ ...prev, deadline: '' }));
                       }}
                       initialFocus
@@ -420,18 +393,37 @@ const EditSubtaskModal = ({ projectId, open, setOpen, subtask, taskId }) => {
                     />
                   </PopoverContent>
                 </Popover>
-                {errors.deadline && <p className="text-red-500 text-xs mt-1 flex items-center">
-                  <X className="h-3 w-3 mr-1" /> {errors.deadline}
-                </p>}
+                {errors.deadline && (
+                  <p className="text-red-500 text-xs mt-1 flex items-center">
+                    <X className="h-3 w-3 mr-1" /> {errors.deadline}
+                  </p>
+                )}
               </div>
 
-              {/* Team Selection - Shows existing team by default */}
+              {/* Time - Optional */}
+              <div>
+                <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
+                  <Clock className="h-4 w-4 text-blue-500 mr-2" />
+                  Time
+                </label>
+                <Input
+                  type="time"
+                  value={selectedTime}
+                  onChange={(e) => {
+                    setSelectedTime(e.target.value);
+                  }}
+                  className="cursor-pointer w-full bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-500 h-10"
+                  placeholder="Select time (optional)"
+                />
+              </div>
+
+              {/* Team Selection - Optional */}
               <div>
                 <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
                   <User className="h-4 w-4 text-blue-500 mr-2" />
-                  Team <span className="text-red-500 ml-1">*</span>
+                  Team
                 </label>
-                <Select value={selectedTeam?.teamId || formData.teamId || ""} onValueChange={handleTeamSelect}>
+                <Select value={selectedTeam?.teamId || formData.teamId || ''} onValueChange={handleTeamSelect}>
                   <SelectTrigger className="w-full bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-500 h-10">
                     <SelectValue placeholder={teamStatus === 'loading' ? 'Loading teams...' : existingTeam ? existingTeam.teamName : 'Select team'} />
                   </SelectTrigger>
@@ -443,12 +435,9 @@ const EditSubtaskModal = ({ projectId, open, setOpen, subtask, taskId }) => {
                     ))}
                   </SelectContent>
                 </Select>
-                {errors.team && <p className="text-red-500 text-xs mt-1 flex items-center">
-                  <X className="h-3 w-3 mr-1" /> {errors.team}
-                </p>}
               </div>
 
-              {/* Assigned To - Shows existing member by default, read-only until team selected for editing */}
+              {/* Assigned To */}
               <div>
                 <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
                   <User className="h-4 w-4 text-blue-500 mr-2" />
@@ -459,28 +448,22 @@ const EditSubtaskModal = ({ projectId, open, setOpen, subtask, taskId }) => {
                     <Button
                       variant="outline"
                       className={cn(
-                        "w-full justify-between bg-white border border-gray-300 rounded-lg text-sm h-10",
-                        // For editing: show existing member as read-only if no team selected
-                        (formData.assignedTo && !selectedTeam) && "hover:bg-gray-50 cursor-default text-gray-700 font-medium",
-                        // For initial adding: disable until team selected
-                        (!selectedTeam && !formData.assignedTo) && "opacity-50 cursor-not-allowed bg-gray-50 text-gray-400",
-                        // Enable when team selected
-                        selectedTeam && "hover:bg-gray-100 focus:ring-2 focus:ring-blue-200 focus:border-blue-500"
+                        'w-full justify-between bg-white border border-gray-300 rounded-lg text-sm h-10',
+                        formData.assignedTo && 'text-gray-700 font-medium',
+                        !selectedTeam && !formData.assignedTo && 'opacity-50 cursor-not-allowed bg-gray-50 text-gray-400',
+                        selectedTeam && 'hover:bg-gray-100 focus:ring-2 focus:ring-blue-200 focus:border-blue-500'
                       )}
                       disabled={(!selectedTeam && !formData.assignedTo) || teamStatus === 'loading'}
                     >
                       {teamStatus === 'loading' ? (
-                        "Loading..."
+                        'Loading...'
                       ) : formData.assignedTo && existingMember ? (
-                        // Show existing member (read-only for editing, editable for initial adding after team select)
-                        <span className={selectedTeam ? "text-gray-700" : "text-gray-700 font-medium"}>
+                        <span className={selectedTeam ? 'text-gray-700' : 'text-gray-700 font-medium'}>
                           {existingMember.memberName} ({existingMember.memberId})
                         </span>
                       ) : !selectedTeam ? (
-                        // For initial adding: show prompt
-                        <span className="text-gray-400">Select team first</span>
+                        <span className="text-gray-400">Select team to choose member</span>
                       ) : (
-                        // Show search prompt when team selected but no member
                         <span className="text-gray-500">Search and select team member</span>
                       )}
                     </Button>
@@ -502,7 +485,7 @@ const EditSubtaskModal = ({ projectId, open, setOpen, subtask, taskId }) => {
                             value={option.value}
                             onSelect={() => handleMemberSelect(option.value)}
                             className={`cursor-pointer text-sm ${
-                              formData.assignedTo === option.value ? "bg-blue-100 text-blue-800" : ""
+                              formData.assignedTo === option.value ? 'bg-blue-100 text-blue-800' : ''
                             }`}
                           >
                             {option.label}
@@ -512,13 +495,15 @@ const EditSubtaskModal = ({ projectId, open, setOpen, subtask, taskId }) => {
                     </Command>
                   </PopoverContent>
                 </Popover>
-                {errors.assignedTo && <p className="text-red-500 text-xs mt-1 flex items-center">
-                  <X className="h-3 w-3 mr-1" /> {errors.assignedTo}
-                </p>}
+                {errors.assignedTo && (
+                  <p className="text-red-500 text-xs mt-1 flex items-center">
+                    <X className="h-3 w-3 mr-1" /> {errors.assignedTo}
+                  </p>
+                )}
               </div>
             </div>
 
-            {/* Full Width Description Section */}
+            {/* Description */}
             <div className="w-full">
               <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
                 <Info className="h-4 w-4 text-blue-500 mr-2" />
@@ -531,12 +516,12 @@ const EditSubtaskModal = ({ projectId, open, setOpen, subtask, taskId }) => {
                 className="w-full h-40 sm:h-48 md:h-52 bg-white border border-gray-300 rounded-lg text-sm resize-vertical focus:ring-2 focus:ring-blue-200 focus:border-blue-500 p-3"
                 placeholder="Enter detailed subtask description..."
               />
-              {errors.description && <p className="text-red-500 text-xs mt-1 flex items-center">
-                <X className="h-3 w-3 mr-1" /> {errors.description}
-              </p>}
+              {errors.description && (
+                <p className="text-red-500 text-xs mt-1 flex items-center">
+                  <X className="h-3 w-3 mr-1" /> {errors.description}
+                </p>
+              )}
             </div>
-
-          
 
             {/* Form Actions */}
             <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-gray-200 mt-6">

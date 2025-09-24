@@ -51,7 +51,7 @@ export const markNotificationAsRead = createAsyncThunk(
   'notifications/markNotificationAsRead',
   async (_id, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.patch(`/notification/markasread/${_id}`);
+      const response = await axiosInstance.put(`/notification/markasread/${_id}`);
       return response.data; // updated notification
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to mark as read');
@@ -64,7 +64,7 @@ export const markAllNotificationsAsRead = createAsyncThunk(
   'notifications/markAllNotificationsAsRead',
   async (recipientId, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.patch(`/notification/markallasread/${recipientId}`);
+      const response = await axiosInstance.put(`/notification/markallasread/${recipientId}`);
       return response.data; // success flag or updated list
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to mark all as read');
@@ -183,3 +183,9 @@ const notificationSlice = createSlice({
 
 export const { clearErrors } = notificationSlice.actions;
 export default notificationSlice.reducer;
+
+
+
+
+
+

@@ -9,7 +9,8 @@ export const createBug = createAsyncThunk(
   async (bugData, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.post("/bugs/create", bugData, {
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "multipart/form-data" },
+        // headers: { "Content-Type": "application/json" },
       });
       return response.data;
     } catch (error) {

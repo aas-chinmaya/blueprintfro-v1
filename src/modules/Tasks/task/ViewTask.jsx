@@ -256,13 +256,16 @@ const TaskView = () => {
                   </div>
                 </div>
               </div>
-            ) : error || !task ? (
-              <div className="flex items-center justify-center w-full h-[80vh] bg-muted/5">
-                <div className="text-center text-xl font-bold text-black">
-                  Task not found
-                </div>
-              </div>
-            ) : (
+            ):
+            //  : !task ? (
+            //   <div className="flex items-center justify-center w-full h-[80vh] bg-muted/5">
+            //     <div className="text-center text-xl font-bold text-black">
+            //       Task not found
+            //     </div>
+            //   </div>
+            // ) :
+            
+            (
               <>
                 {/* Actions Bar at Top */}
                 <div className="flex flex-wrap justify-end gap-2 mb-6">
@@ -499,7 +502,7 @@ const TaskView = () => {
       <Button variant="outline" onClick={() => setIsDelayDialogOpen(false)}>
         Cancel
       </Button>
-      <Button onClick={handleSubmitDelayReason} disabled={!delayReason.trim() || updating}>
+      <Button  className="bg-blue-700" onClick={handleSubmitDelayReason} disabled={!delayReason.trim() || updating}>
         Submit
       </Button>
     </DialogFooter>
