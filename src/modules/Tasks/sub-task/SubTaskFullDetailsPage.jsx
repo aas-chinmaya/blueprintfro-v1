@@ -572,6 +572,7 @@ const SubTaskFullDetailsPage = ({ task_id, subtask_id }) => {
               {/* Assigned Details and Reported Issues in Two Columns */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Assigned Details */}
+              
                 <div>
                   <h3 className="text-lg font-semibold mb-4 flex items-center text-blue-600">
                     <User className="mr-2 h-5 w-5" />
@@ -584,7 +585,7 @@ const SubTaskFullDetailsPage = ({ task_id, subtask_id }) => {
                         <div className="text-xs text-slate-500">Assigned To</div>
                         <div className="font-medium">
                           {subTask?.assignedToDetails?.memberName || 
-                           subTask?.assignedToName || 
+                          
                            "N/A"}
                         </div>
                       </div>
@@ -594,7 +595,7 @@ const SubTaskFullDetailsPage = ({ task_id, subtask_id }) => {
                       <div className="flex-1">
                         <div className="text-xs text-slate-500">Assigned By</div>
                         <div className="font-medium">
-                          {subTask?.assignedBy || subTask?.createdByName || "N/A"}
+                          { subTask?.assignedBy?.assignedBy || "N/A"}
                         </div>
                       </div>
                     </div>

@@ -281,6 +281,24 @@ export const getAllTaskByEmployeeId = createAsyncThunk(
     }
   }
 );
+
+
+// 🔹 Thunk
+export const getAllSubTaskByEmployeeId = createAsyncThunk(
+  "task/getAllSubTaskByEmployeeId",
+  async (employeeId, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.get(`/subtask/member/${employeeId}`);
+      
+      // console.log(res.data.subtasks);
+      
+      return res.data.subtasks;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || err.message);
+    }
+  }
+);
+
 // Update Review Status (Simple)
 export const updateTaskReviewStatus = createAsyncThunk(
   'task/updateTaskReviewStatus',
@@ -385,7 +403,7 @@ const initialState = {
   allTaskList: [], // All tasks (including deleted/archived for admin)
   employeeTasks: [], // Tasks for a specific employee
   isLoading: false, // Added to handle loading state for employee tasks
-
+ employeeSubTasks: [], // ✅
 employeeProjectTasks: {}, // Tasks grouped by project and employee
     loading: false,
     error: null,
@@ -627,7 +645,19 @@ const taskSlice = createSlice({
 .addCase(fetchEmployeeProjectTasks.rejected, (state, action) => {
   state.status = 'failed';
   state.error = action.payload;
-});
+})
+
+    .addCase(getAllSubTaskByEmployeeId.pending, (s) => {
+      s.status = "loading";
+    })
+    .addCase(getAllSubTaskByEmployeeId.fulfilled, (s, a) => {
+      s.status = "succeeded";
+      s.employeeSubTasks = a.payload;
+    })
+    .addCase(getAllSubTaskByEmployeeId.rejected, (s, a) => {
+      s.status = "failed";
+      s.error = a.payload;
+    });
 
 
   },
@@ -641,9 +671,10 @@ export const selectAllTasks = (state) => state.task.tasks;
 export const selectCurrentTask = (state) => state.task.currentTask;
 export const selectAllTaskList = (state) => state.task.allTaskList;
 export const selectAllTaskListByEmployeeId = (state) => state.task.employeeTasks;
+export const selectAllSubTaskListByEmployeeId = (state) => state.task.employeeSubTasks;
+
 export const selectEmployeeProjectTasks = (state, projectId, employeeId) => {
   return state.task.employeeProjectTasks[projectId]?.[employeeId] || [];
 };
-
 
 export default taskSlice.reducer;

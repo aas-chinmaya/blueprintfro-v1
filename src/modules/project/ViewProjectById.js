@@ -337,7 +337,7 @@ const canEditStatus = currentUser?.role?.toLowerCase() === "cpc" || isTeamLead |
                         <span className="font-semibold text-gray-900 w-28">
                           Client ID:
                         </span>
-                        <span>{project.data.clientId}</span>
+                        <span>{project?.data.clientId}</span>
                       </div>
                     )}
                     <div className="flex items-center gap-3">

@@ -14,7 +14,7 @@ import {
   clearProjectBugs,
 } from "@/features/bugSlice";
 import { getTeamMembersByProjectId } from "@/features/teamSlice";
-import { Eye, X, CalendarIcon, Filter, Download, Plus, Bug } from "lucide-react";
+import { Eye, X, CalendarIcon, Filter, Download, Plus, Bug, Edit } from "lucide-react";
 import { toast } from "sonner";
 import Spinner from "@/components/loader/Spinner";
 import { Input } from "@/components/ui/input";
@@ -29,6 +29,7 @@ import { cn } from "@/lib/utils";
 import { formatDateTimeIST } from "@/utils/formatDate";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import BugDetailsViewModal from "./BugDetailsViewModal";
+import BugEditModal from "./BugEditModal";
 
 const ProjectWiseBugList = ({ projectId, project, teamLeadId }) => {
  
@@ -43,6 +44,7 @@ const ProjectWiseBugList = ({ projectId, project, teamLeadId }) => {
   const [showFilterDialog, setShowFilterDialog] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedBug, setSelectedBug] = useState(null);
+ 
   const [viewMode, setViewMode] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [tempPriorityFilter, setTempPriorityFilter] = useState("all");
@@ -58,6 +60,14 @@ const ProjectWiseBugList = ({ projectId, project, teamLeadId }) => {
   const [sortConfig, setSortConfig] = useState({ key: "", direction: "asc" });
   const [currentPage, setCurrentPage] = useState(1);
   const bugsPerPage = 10;
+
+
+const [showEditModal, setShowEditModal] = useState(false);
+const [selectedBugForEdit, setSelectedBugForEdit] = useState(null);
+const handleEditBug = (bug) => {
+  setSelectedBugForEdit(bug);
+  setShowEditModal(true);
+};
 
   // Redux selectors
   const bugsByProjectId = useSelector((state) => state.bugs.bugsByProjectId);
@@ -567,6 +577,24 @@ const bugs = useMemo(() => {
                           </TooltipTrigger>
                           <TooltipContent className="bg-black text-white border-none">View Bug</TooltipContent>
                         </Tooltip>
+                       
+                         {(currentUser?.role === "cpc"|| currentUser?.position === "Team Lead"|| isTeamLead ) && (
+                         <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleEditBug(bug)}
+                              className="text-blue-600 hover:text-blue-800 hover:bg-gray-100 rounded-full"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent className="bg-black text-white border-none">View Bug</TooltipContent>
+                        </Tooltip>
+                         )
+                        }
+                       
                       </div>
                     </TableCell>
                   </TableRow>
@@ -627,7 +655,16 @@ const bugs = useMemo(() => {
   onOpenChange={setShowViewModal}
   bug={selectedBug}
 />
-    
+    <BugEditModal
+  isOpen={showEditModal}
+  onOpenChange={setShowEditModal}
+  bug={selectedBugForEdit}
+  
+/>
+
+
+ 
+
       </div>
     </TooltipProvider>
   );

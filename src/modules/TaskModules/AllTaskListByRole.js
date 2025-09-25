@@ -18,7 +18,6 @@ export default function AllTaskListByRole() {
 //   role: employeeData?.role, // Change to 'employee' or 'team_lead' for testing
 //   name: employeeData?.name,
 // };
-console.log("Current User in AllTaskListByRole:", currentUser);
   return (
     <div className="">
       {currentUser.role === "cpc"||  currentUser?.position === "Team Lead" ? (

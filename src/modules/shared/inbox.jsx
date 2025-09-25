@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -27,11 +26,15 @@ import {
   DialogTitle,
   DialogClose,
 } from "@/components/ui/dialog";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
-export default function Inbox({ recipientId }) {
+export default function Inbox() {
   const [selectedNotification, setSelectedNotification] = useState(null);
   const dispatch = useDispatch();
 
+const {currentUser}=useCurrentUser();
+
+const recipientId=currentUser?.id;
   const {
     items: notifications = [],
     loading,
@@ -43,7 +46,6 @@ export default function Inbox({ recipientId }) {
       dispatch(fetchNotifications(recipientId));
     }
   }, [dispatch, recipientId]);
-
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -65,10 +67,25 @@ export default function Inbox({ recipientId }) {
     setSelectedNotification(null);
   };
 
+
+
   const handleSelectNotification = (notification) => {
-    setSelectedNotification(notification);
     if (!notification.read) {
-      dispatch(markNotificationAsRead(notification._id));
+      // Dispatch and wait for it to complete
+      dispatch(markNotificationAsRead(notification._id))
+        .unwrap()
+        .then(() => {
+          // Update local selectedNotification to reflect read status
+          setSelectedNotification({ ...notification, read: true });
+        })
+        .catch((err) => {
+          console.error("Failed to mark notification as read:", err);
+          // fallback: still select notification without changing read
+          setSelectedNotification(notification);
+        });
+    } else {
+      // Already read, just select
+      setSelectedNotification(notification);
     }
   };
 
@@ -78,7 +95,8 @@ export default function Inbox({ recipientId }) {
     const minutes = Math.floor((now - date.getTime()) / 60000);
 
     if (minutes < 1) return "Received just now";
-    if (minutes < 60) return `Received ${minutes} minute${minutes > 1 ? "s" : ""} ago`;
+    if (minutes < 60)
+      return `Received ${minutes} minute${minutes > 1 ? "s" : ""} ago`;
     if (minutes < 1440) {
       const hours = Math.floor(minutes / 60);
       return `Received ${hours} hour${hours > 1 ? "s" : ""} ago`;
@@ -108,7 +126,11 @@ export default function Inbox({ recipientId }) {
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" onClick={handleMarkAllAsRead}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={handleMarkAllAsRead}
+                    >
                       <Check className="h-4 w-4 text-green-500" />
                     </Button>
                   </TooltipTrigger>
@@ -122,7 +144,11 @@ export default function Inbox({ recipientId }) {
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" onClick={handleDeleteAllNotifications}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={handleDeleteAllNotifications}
+                    >
                       <Trash2 className="h-4 w-4 text-rose-500" />
                     </Button>
                   </TooltipTrigger>
@@ -139,12 +165,12 @@ export default function Inbox({ recipientId }) {
           {loading.fetch ? (
             <div className="p-6 text-center">
               <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-indigo-600 mx-auto"></div>
-              <p className="mt-2 text-sm text-muted-foreground">Loading notifications...</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Loading notifications...
+              </p>
             </div>
           ) : error.fetch ? (
-            <div className="py-6 text-center text-rose-500">
-              {error.fetch}
-            </div>
+            <div className="py-6 text-center text-rose-500">{error.fetch}</div>
           ) : notifications.length === 0 ? (
             <div className="py-6 text-center text-muted-foreground">
               <Bell className="mx-auto h-8 w-8 mb-2" />
@@ -159,15 +185,20 @@ export default function Inbox({ recipientId }) {
                   className={cn(
                     "py-3 px-3 cursor-pointer hover:bg-indigo-50 transition-colors group rounded-lg",
                     !notification.read && "bg-indigo-100/50",
-                    selectedNotification?._id === notification._id && "bg-indigo-200"
+                    selectedNotification?._id === notification._id &&
+                      "bg-indigo-200"
                   )}
                 >
                   <div className="flex justify-between items-start">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <p className="font-medium text-sm truncate">{notification.message}</p>
+                        <p className="font-medium text-sm truncate">
+                          {notification.message}
+                        </p>
                         <Badge
-                          variant={notification.read ? "secondary" : "destructive"}
+                          variant={
+                            notification.read ? "secondary" : "destructive"
+                          }
                           className={cn(
                             "text-xs",
                             notification.read
@@ -225,7 +256,9 @@ export default function Inbox({ recipientId }) {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => handleDeleteNotification(selectedNotification._id)}
+                onClick={() =>
+                  handleDeleteNotification(selectedNotification._id)
+                }
               >
                 <Trash2 className="h-5 w-5 text-rose-500" />
               </Button>
@@ -233,7 +266,9 @@ export default function Inbox({ recipientId }) {
             <div className="space-y-4">
               <div>
                 <h4 className="font-medium">Message</h4>
-                <p className="text-sm text-muted-foreground">{selectedNotification.message}</p>
+                <p className="text-sm text-muted-foreground">
+                  {selectedNotification.message}
+                </p>
               </div>
               <div>
                 <h4 className="font-medium">Received</h4>
@@ -244,7 +279,9 @@ export default function Inbox({ recipientId }) {
               <div>
                 <h4 className="font-medium">Status</h4>
                 <Badge
-                  variant={selectedNotification.read ? "secondary" : "destructive"}
+                  variant={
+                    selectedNotification.read ? "secondary" : "destructive"
+                  }
                   className={cn(
                     "text-xs",
                     selectedNotification.read
@@ -265,12 +302,19 @@ export default function Inbox({ recipientId }) {
       </div>
 
       {/* Modal for Notification Details on Mobile */}
-      <Dialog open={selectedNotification && window.innerWidth < 768} onOpenChange={() => setSelectedNotification(null)}>
+      <Dialog
+        open={selectedNotification && window.innerWidth < 768}
+        onOpenChange={() => setSelectedNotification(null)}
+      >
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Notification Details</DialogTitle>
             <DialogClose asChild>
-              <Button variant="ghost" size="icon" onClick={() => setSelectedNotification(null)}>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setSelectedNotification(null)}
+              >
                 <X className="h-5 w-5" />
               </Button>
             </DialogClose>
@@ -279,7 +323,9 @@ export default function Inbox({ recipientId }) {
             <div className="space-y-4">
               <div>
                 <h4 className="font-medium">Message</h4>
-                <p className="text-sm text-muted-foreground">{selectedNotification.message}</p>
+                <p className="text-sm text-muted-foreground">
+                  {selectedNotification.message}
+                </p>
               </div>
               <div>
                 <h4 className="font-medium">Received</h4>
@@ -290,7 +336,9 @@ export default function Inbox({ recipientId }) {
               <div>
                 <h4 className="font-medium">Status</h4>
                 <Badge
-                  variant={selectedNotification.read ? "secondary" : "destructive"}
+                  variant={
+                    selectedNotification.read ? "secondary" : "destructive"
+                  }
                   className={cn(
                     "text-xs",
                     selectedNotification.read
@@ -303,7 +351,9 @@ export default function Inbox({ recipientId }) {
               </div>
               <Button
                 variant="destructive"
-                onClick={() => handleDeleteNotification(selectedNotification._id)}
+                onClick={() =>
+                  handleDeleteNotification(selectedNotification._id)
+                }
                 className="w-full"
               >
                 <Trash2 className="h-4 w-4 mr-2" />
@@ -316,7 +366,3 @@ export default function Inbox({ recipientId }) {
     </div>
   );
 }
-
-
-
-
