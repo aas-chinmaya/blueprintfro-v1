@@ -59,6 +59,7 @@ import { formatDateUTC } from "@/utils/formatDate";
 import TeamManagement from "../Teams/TeamManagement";
 import DocumentManager from "../document/project-doc/DocumentManager";
 import ProjectOverview from "./ProjectOverview";
+import Dashboard from "./ProjectOverview";
 
 export default function ViewProjectById({ projectId }) {
 
@@ -159,11 +160,11 @@ const searchParams = useSearchParams();
   const statusOptions = ["In Progress", "Completed"];
 
   const tabs = [
-    {
-      id: "overview",
-      label: "Overview",
-      icon: <FiInfo className="h-5 w-5" />,
-    },
+    // {
+    //   id: "overview",
+    //   label: "Overview",
+    //   icon: <FiInfo className="h-5 w-5" />,
+    // },
     {
       id: "details",
       label: "Detail's",
@@ -293,7 +294,7 @@ const canEditStatus = currentUser?.role?.toLowerCase() === "cpc" || isTeamLead |
                       Project Details
                     </h3>
                   
-                    {(currentUser?.role === "cpc"|| currentUser?.position === "Team Lead"|| isTeamLead ) && (
+                    {(currentUser?.role === "cpc"|| currentUser?.position === "Team Lead" ) && (
                     // {(currentUser?.role === "cpc" || isTeamLead) && (
                       <Button
                         size="sm"
@@ -554,7 +555,8 @@ const canEditStatus = currentUser?.role?.toLowerCase() === "cpc" || isTeamLead |
               <div className="space-y-4">
 
 
-                <ProjectOverview project={project.data} projectId={projectId} teamLeadId={project?.data?.teamLeadId} />
+                <Dashboard project={project.data} projectId={projectId} teamLeadId={project?.data?.teamLeadId} />
+                {/* <ProjectOverview project={project.data} projectId={projectId} teamLeadId={project?.data?.teamLeadId} /> */}
               </div>
             </TabsContent>
 

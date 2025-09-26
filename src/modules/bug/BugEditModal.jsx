@@ -1,10 +1,4 @@
 
-
-
-
-
-
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -33,10 +27,9 @@ import { toast } from "sonner";
 import { format, parseISO } from "date-fns";
 import { getBugById, editBug } from "@/features/bugSlice";
 
-const EditBugModal = ({bug, isOpen, onOpenChange }) => {
+const EditBugModal = ({bugId, isOpen, onOpenChange }) => {
     
-   
-    const bugId=bug?.bug_id;
+
  
    
 
@@ -144,6 +137,7 @@ const EditBugModal = ({bug, isOpen, onOpenChange }) => {
 
     try {
       await dispatch(editBug({ bugId, bugData })).unwrap();
+      
       toast.success("Bug updated successfully!");
       handleClose();
     } catch (err) {

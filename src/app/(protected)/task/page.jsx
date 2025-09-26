@@ -1,7 +1,7 @@
 'use client';
 
-import CpcTaskList from '@/modules/TaskModules/CpcTaskList';
-import EmployeeTaskList from '@/modules/TaskModules/EmployeeTaskList';
+import CpcTaskList from '@/modules/Tasks/task/CpcTaskList';
+import EmployeeTaskList from '@/modules/Tasks/task/EmployeeTaskList';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 
 

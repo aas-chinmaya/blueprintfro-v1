@@ -450,8 +450,8 @@ export default function DocumentManager({ project, projectId }) {
   return (
     <TooltipProvider delayDuration={150} skipDelayDuration={0}>
       <div className="w-full bg-white ">
-        <Card className=" mx-auto bg-white border border-gray-200 rounded-xl shadow-sm">
-          <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+        
+          <div className="space-y-2">
             {/* Search and Controls - two main elements */}
 
             <div className="flex flex-wrap gap-4">
@@ -789,8 +789,8 @@ export default function DocumentManager({ project, projectId }) {
                 </div>
               </>
             )}
-          </CardContent>
-        </Card>
+          </div>
+      
 
         {/* Upload Dialog - responsive max-width */}
         <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>

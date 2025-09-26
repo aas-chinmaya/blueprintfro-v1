@@ -52,49 +52,39 @@ export const fullNav = [
     roles: ["cpcGroup", "employeeGroup"],
   },
   {
-    title: "Client",
-    url: "/client",
-    icon: "User",
-    roles: ["cpcGroup"],
-  },
-  {
-    title: "Project",
-    url: "/project",
-    icon: "Folder",
-    roles: ["cpcGroup", "employeeGroup"],
-  },
-  // coming soon
-  
-  {
-    title: "Team",
-    url: "/team",
-    icon: "Users",
-    roles: ["cpcGroup", "employeeGroup"],
-  },
-  {
-    title: "Task",
-    url: "/task",
-    icon: "ListChecks",
-    roles: ["cpcGroup", "employeeGroup"],
-  },
-  {
-    title: "Bug",
-    url: "/bug",
-    icon: "Bug",
-    roles: ["cpcGroup"],
-  },
-  {
-    title: "Bug",
-    url: "/bug/assigned-bugs",
-    icon: "Bug",
-    roles: ["employeeGroup"],
-  },
-  {
     title: "Contact",
     url: "/contact",
     icon: "PhoneCall",
     roles: ["cpcGroup"],
   },
+   {
+    title: "Client",
+    url: "/client",
+    icon: "User",
+    roles: ["cpcGroup"],
+  },
+ 
+
+  {
+    title: "Quotation",
+    url: "/quotation",
+    icon: "FileText",
+    roles: ["cpcGroup"],
+  },
+  {
+   title: "Project Management",
+   url: "#",
+   icon: "CalendarDays",
+   roles: ["cpcGroup","employeeGroup"],
+   items: [
+     { title: "All Project", url: "/project", roles: ["cpcGroup","employeeGroup"] },
+     { title: "Active Team", url: "/team", roles: ["cpcGroup","employeeGroup"] },
+     { title: "All Task", url: "/task", roles: ["cpcGroup","employeeGroup"] },
+     { title: "All Bug", url: "/bug", roles: ["cpcGroup"] },
+     { title: "Assinged Bug", url: "/bug/assigned-bugs", roles: ["employeeGroup"] },
+   ],
+ },
+ 
   {
     title: "Meeting",
     url: "#",
@@ -104,15 +94,10 @@ export const fullNav = [
       { title: "Client Meeting", url: "/meetings/all", roles: ["cpcGroup"] },
       { title: "Meeting Calendar", url: "/meetings/calendar", roles: ["cpcGroup"] },
       { title: "MOM Dashboard", url: "/meetings/mom", roles: ["cpcGroup"] },
-      { title: "Cause Dashboard", url: "/meetings/cause", roles: ["cpcGroup"] },
+      
     ],
   },
-  {
-    title: "Quotation",
-    url: "/quotation",
-    icon: "FileText",
-    roles: ["cpcGroup"],
-  },
+  
   //  {
   //   title: "Documents",
   //   url: "#",
@@ -124,6 +109,15 @@ export const fullNav = [
    
   //   ],
   // },
+  {
+    title: "Concerns",
+    url: "#",
+    icon: "FolderClosed",
+    roles: ["cpcGroup"],
+    items: [
+      { title: "Cause Dashboard", url: "/meetings/cause", roles: ["cpcGroup"] },
+    ],
+  },
   {
     title: "Master",
     url: "#",

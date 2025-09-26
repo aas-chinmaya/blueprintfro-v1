@@ -39,7 +39,7 @@ import {
   updateSubTaskStatus,
 } from "@/features/subTaskSlice";
 import { fetchTaskById } from "@/features/taskSlice";
-import { formatDateUTC } from "@/utils/formatDate";
+import { formatDateTimeIST, formatDateUTC } from "@/utils/formatDate";
 import { Button } from "@/components/ui/button";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { toast } from "sonner";
@@ -384,7 +384,7 @@ const SubTaskFullDetailsPage = ({ task_id, subtask_id }) => {
   return (
     <TooltipProvider>
       <div className="min-h-screen">
-        <Card className="shadow-xl rounded-2xl overflow-hidden border border-slate-200">
+        <Card className="shadow-xl rounded-2xl overflow-hidden border border-slate-200 min-h-screen">
           <CardHeader className="bg-transparent border-b border-slate-200">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -399,7 +399,7 @@ const SubTaskFullDetailsPage = ({ task_id, subtask_id }) => {
               
               <div className="flex items-center gap-4">
                 <CardTitle className="text-lg sm:text-xl text-blue-600">
-                  Subtask Details
+              
                 </CardTitle>
                 <Badge
                   className={`${statusColors[subTask?.status] || "bg-slate-600 text-white"} text-xs sm:text-sm px-3 py-1 rounded-full`}
@@ -604,12 +604,12 @@ const SubTaskFullDetailsPage = ({ task_id, subtask_id }) => {
                       <div className="flex-1">
                         <div className="text-xs text-slate-500">Deadline</div>
                         <div className={`font-medium flex items-center gap-1 ${
-                          subTask?.deadline && formatDateUTC(new Date()) > formatDateUTC(new Date(subTask.deadline)) 
+                          subTask?.deadline && formatDateTimeIST(new Date()) > formatDateTimeIST(new Date(subTask.deadline)) 
                             ? "text-red-600" 
                             : ""
                         }`}>
-                          {formatDateUTC(subTask?.deadline) || "No deadline"}
-                          {subTask?.deadline && formatDateUTC(new Date()) > formatDateUTC(new Date(subTask.deadline)) && (
+                          {formatDateTimeIST(subTask?.deadline) || "No deadline"}
+                          {subTask?.deadline && formatDateTimeIST(new Date()) > formatDateTimeIST(new Date(subTask.deadline)) && (
                             <AlertCircle className="h-3 w-3 text-red-500" title="Overdue" />
                           )}
                         </div>

@@ -1,14 +1,4 @@
 
-
-
-
-
-
-
-
-
-
-
 "use client";
 
 import { format } from "date-fns";
@@ -24,7 +14,8 @@ import {
   selectEmployeeProjectTasks,
   fetchEmployeeProjectTasks,
 } from "@/features/taskSlice";
-import { Eye, Edit, Trash2, X, CalendarIcon, Filter, Download, Plus } from "lucide-react";
+import { MoreVertical, CalendarIcon, Filter,
+  Eye,Edit,Trash2, Download, Plus, Search, AlertCircle, X } from "lucide-react";
 import { toast } from "sonner";
 import Spinner from "@/components/loader/Spinner";
 import { Input } from "@/components/ui/input";
@@ -34,13 +25,17 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { formatDateTimeIST } from "@/utils/formatDate";
 import CreateTaskModal from "./CreateTaskModal";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-
-
 
 const AllTaskListByProjectId = ({ projectId, project }) => {
   const { currentUser, isTeamLead } = useCurrentUser(project?.teamLeadId);
@@ -67,8 +62,6 @@ const AllTaskListByProjectId = ({ projectId, project }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const tasksPerPage = 10;
 
-
-
   // Fetch tasks
   useEffect(() => {
     if (projectId) {
@@ -81,43 +74,27 @@ const AllTaskListByProjectId = ({ projectId, project }) => {
   const employeeId = currentUser?.id;
   const tasksFromStore = useSelector((state) => selectTasksByProjectId(state, projectId));
   const status = useSelector(selectTaskStatus);
-   const employeeProjectTasks = useSelector((state) => selectEmployeeProjectTasks(state, projectId, employeeId));
+  const employeeProjectTasks = useSelector((state) => selectEmployeeProjectTasks(state, projectId, employeeId));
 
-   useEffect(() => {
-     if (viewMode === "my" && projectId && employeeId) {
-       dispatch(fetchEmployeeProjectTasks({ projectId, employeeId }));
-       
-     }
-   }, [dispatch, viewMode, projectId, employeeId]);
-
-
-
-
-
-
-
-
-
+  useEffect(() => {
+    if (viewMode === "my" && projectId && employeeId) {
+      dispatch(fetchEmployeeProjectTasks({ projectId, employeeId }));
+    }
+  }, [dispatch, viewMode, projectId, employeeId]);
 
   const tasks = useMemo(() => {
-  if (currentUser?.role === "cpc" || (isTeamLead && viewMode === "all")) {
-    return tasksFromStore;
-  } else if (viewMode === "my") {
-    return employeeProjectTasks || [];
-  } else {
-    return tasksFromStore;
-  }
-}, [currentUser?.role, isTeamLead, viewMode, tasksFromStore, employeeProjectTasks]);
-
+    if (currentUser?.role === "cpc" || (isTeamLead && viewMode === "all")) {
+      return tasksFromStore;
+    } else if (viewMode === "my") {
+      return employeeProjectTasks || [];
+    } else {
+      return tasksFromStore;
+    }
+  }, [currentUser?.role, isTeamLead, viewMode, tasksFromStore, employeeProjectTasks]);
 
   const isCpc = currentUser?.role === "cpc";
   const showAllViewOption = isCpc || isTeamLead;
-    const showAssignedFilter = showAllViewOption && viewMode === "all";
-
-
-
-
-
+  const showAssignedFilter = showAllViewOption && viewMode === "all";
 
   const handleViewTask = (task_id) => router.push(`/task/${task_id}`);
   const handleEditTask = (task_id) => router.push(`/task/edit/${task_id}`);
@@ -125,7 +102,7 @@ const AllTaskListByProjectId = ({ projectId, project }) => {
     try {
       await dispatch(deleteTask(taskIdToDelete)).unwrap();
       toast.success("Task deleted successfully!");
-      setCurrentPage(1); // Reset to first page after deletion
+      setCurrentPage(1);
     } catch (err) {
       toast.error(err || "Failed to delete task.");
     }
@@ -148,7 +125,7 @@ const AllTaskListByProjectId = ({ projectId, project }) => {
       key,
       direction: prev.key === key && prev.direction === "asc" ? "desc" : "asc",
     }));
-    setCurrentPage(1); // Reset to first page on sort
+    setCurrentPage(1);
   };
 
   const assignedMembers = useMemo(() => {
@@ -169,8 +146,6 @@ const AllTaskListByProjectId = ({ projectId, project }) => {
   const filteredTasks = useMemo(() => {
     let filtered = Array.isArray(tasks) ? [...tasks] : [];
 
-
-    // Search
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
@@ -181,10 +156,8 @@ const AllTaskListByProjectId = ({ projectId, project }) => {
       );
     }
 
-    // Filters
     if (priorityFilter !== "all") filtered = filtered.filter((task) => task.priority === priorityFilter);
     if (statusFilter !== "all") filtered = filtered.filter((task) => task.status === statusFilter);
-    
     if (assignedToFilter !== "all") filtered = filtered.filter((task) => task?.assignedToDetails?.memberName === assignedToFilter);
     if (dateFrom || dateTo) {
       filtered = filtered.filter((task) => {
@@ -194,7 +167,6 @@ const AllTaskListByProjectId = ({ projectId, project }) => {
       });
     }
 
-    // Sorting
     if (sortConfig.key) {
       filtered.sort((a, b) => {
         let aValue = sortConfig.key.includes(".")
@@ -262,7 +234,6 @@ const AllTaskListByProjectId = ({ projectId, project }) => {
     }
   };
 
-  // Pagination logic
   const totalPages = Math.max(1, Math.ceil(filteredTasks.length / tasksPerPage));
   const paginatedTasks = filteredTasks.slice(
     (currentPage - 1) * tasksPerPage,
@@ -275,7 +246,6 @@ const AllTaskListByProjectId = ({ projectId, project }) => {
     }
   };
 
-  // Generate pagination buttons (up to 8 pages)
   const getPaginationButtons = () => {
     const maxButtons = 8;
     const buttons = [];
@@ -293,428 +263,429 @@ const AllTaskListByProjectId = ({ projectId, project }) => {
     return buttons;
   };
 
-  if (status === "loading" || showLoader) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] bg-white">
-        <Spinner />
-      </div>
-    );
-  }
+  const getInitials = (name) => {
+    if (!name) return "N/A";
+    if (name === currentUser?.name && viewMode === "my") return "Me";
+    const words = name.split(" ");
+    return words.length > 1
+      ? `${words[0][0]}${words[1][0]}`.toUpperCase()
+      : name.slice(0, 2).toUpperCase();
+  };
+
+  const truncateTitle = (title) => {
+    if (!title) return "N/A";
+    return title.length > 70 ? `${title.slice(0, 70)}...` : title;
+  };
+
+  // if (status === "loading" || showLoader) {
+  //   return (
+  //     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] bg-white">
+  //       <Spinner />
+  //     </div>
+  //   );
+  // }
 
   return (
-    <TooltipProvider>
-      <div className="flex flex-col min-h-[calc(100vh-4rem)] bg-white text-black ">
-        {/* Header */}
-        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full">
-            <Input
-              placeholder="Search tasks..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded-lg text-black text-sm sm:text-base"
-            />
+    <TooltipProvider delayDuration={150} skipDelayDuration={0}>
+      <div className="w-full bg-white">
+        <div className=" space-y-2">
+          {/* Search and Controls */}
+          <div className="flex flex-wrap gap-4">
+            <div className="flex-1 min-w-[180px]">
+              <div className="relative w-full">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  placeholder="Search tasks..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 text-sm w-full bg-white border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded-lg"
+                />
+              </div>
+            </div>
             {isTeamLead && (
-              <Select value={viewMode} onValueChange={setViewMode}>
-                <SelectTrigger className="w-full sm:w-40 bg-white border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded-lg text-black text-sm sm:text-base">
-                  <SelectValue placeholder="View Mode" />
-                </SelectTrigger>
-                <SelectContent className="bg-white shadow-lg border-gray-200 rounded-lg text-black">
-                  <SelectItem value="my">My Tasks</SelectItem>
-                  <SelectItem value="all">All Tasks</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="flex-1 min-w-[140px]">
+                <Select value={viewMode} onValueChange={setViewMode}>
+                  <SelectTrigger className="text-sm w-full bg-white border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded-lg">
+                    <SelectValue placeholder="View Mode" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white shadow-lg border-gray-200 rounded-lg">
+                    <SelectItem value="my">My Tasks</SelectItem>
+                    <SelectItem value="all">All Tasks</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             )}
-          </div>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="w-10 h-10 sm:w-auto sm:px-4 bg-white text-black border-gray-300 hover:bg-gray-100 rounded-lg"
-                  onClick={() => setShowFilterDialog(true)}
-                >
-                  <Filter className="h-4 w-4" />
-                  <span className="hidden sm:inline sm:ml-2">Filter</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent className="bg-black text-white border-none">Open filter options</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="w-10 h-10 sm:w-auto sm:px-4 bg-white text-black border-gray-300 hover:bg-gray-100 rounded-lg"
-                  onClick={handleResetFilters}
-                >
-                  <X className="h-4 w-4" />
-                  <span className="hidden sm:inline sm:ml-2">Reset</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent className="bg-black text-white border-none">Reset all filters</TooltipContent>
-            </Tooltip>
+            <div className="flex-1 min-w-[140px]">
+              <Button
+                variant="outline"
+                className="w-full bg-white text-black border-gray-300 hover:bg-gray-100 rounded-lg h-[38px] text-sm flex items-center justify-center"
+                onClick={() => setShowFilterDialog(true)}
+              >
+                <Filter className="w-4 h-4 mr-2" />
+                Filter
+              </Button>
+            </div>
+            <div className="flex-1 min-w-[140px]">
+              <Button
+                variant="outline"
+                className="w-full bg-white text-black border-gray-300 hover:bg-gray-100 rounded-lg h-[38px] text-sm flex items-center justify-center"
+                onClick={handleResetFilters}
+              >
+                <X className="w-4 h-4 mr-2" />
+                Reset
+              </Button>
+            </div>
             {(currentUser?.role === "cpc" || isTeamLead) && (
               <>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="default"
-                      size="icon"
-                      className="w-10 h-10 sm:w-auto sm:px-4 bg-blue-600 text-white hover:bg-blue-700 rounded-lg"
-                      onClick={handleDownloadReport}
-                    >
-                      <Download className="h-4 w-4" />
-                      <span className="hidden sm:inline sm:ml-2">Download</span>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent className="bg-black text-white border-none">Download report</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="default"
-                      size="icon"
-                      className="w-10 h-10 sm:w-auto sm:px-4 bg-blue-600 text-white hover:bg-blue-700 rounded-lg"
-                      onClick={() => setShowCreateTaskModal(true)}
-                    >
-                      <Plus className="h-4 w-4" />
-                      <span className="hidden sm:inline sm:ml-2">Create Task</span>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent className="bg-black text-white border-none">Create new task</TooltipContent>
-                </Tooltip>
+                <div className="flex-1 min-w-[140px]">
+                  <Button
+                    variant="default"
+                    className="w-full bg-blue-600 text-white hover:bg-blue-700 rounded-lg h-[38px] text-sm flex items-center justify-center"
+                    onClick={handleDownloadReport}
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Download
+                  </Button>
+                </div>
+                <div className="flex-1 min-w-[140px]">
+                  <Button
+                    variant="default"
+                    className="w-full bg-blue-600 text-white hover:bg-blue-700 rounded-lg h-[38px] text-sm flex items-center justify-center"
+                    onClick={() => setShowCreateTaskModal(true)}
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Task
+                  </Button>
+                </div>
               </>
             )}
           </div>
-        </div>
 
-        {/* Filter Dialog */}
-        <Dialog open={showFilterDialog} onOpenChange={setShowFilterDialog}>
-          <DialogContent className="sm:max-w-md bg-white shadow-lg border-gray-200 rounded-lg text-black">
-            <DialogHeader>
-              <DialogTitle>Filter Tasks</DialogTitle>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <Select value={tempPriorityFilter} onValueChange={setTempPriorityFilter}>
-                <SelectTrigger className="w-full bg-white border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded-lg text-black text-sm sm:text-base">
-                  <SelectValue placeholder="Priority" />
-                </SelectTrigger>
-                <SelectContent className="bg-white shadow-lg border-gray-200 rounded-lg text-black">
-                  <SelectItem value="all">All Priorities</SelectItem>
-                  <SelectItem value="Low">Low</SelectItem>
-                  <SelectItem value="Medium">Medium</SelectItem>
-                  <SelectItem value="High">High</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={tempStatusFilter} onValueChange={setTempStatusFilter}>
-                <SelectTrigger className="w-full bg-white border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded-lg text-black text-sm sm:text-base">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent className="bg-white shadow-lg border-gray-200 rounded-lg text-black">
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="Pending">Pending</SelectItem>
-                  <SelectItem value="In Progress">In Progress</SelectItem>
-                  <SelectItem value="Completed">Completed</SelectItem>
-                </SelectContent>
-              </Select>
-             {
-              showAssignedFilter && (
+          {/* Filter Dialog */}
+          <Dialog open={showFilterDialog} onOpenChange={setShowFilterDialog}>
+            <DialogContent className="max-w-[95vw] sm:max-w-md bg-white shadow-lg border-gray-200 rounded-lg">
+              <DialogHeader>
+                <DialogTitle className="text-lg font-semibold text-gray-900">Filter Tasks</DialogTitle>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <Select value={tempPriorityFilter} onValueChange={setTempPriorityFilter}>
+                  <SelectTrigger className="w-full bg-white border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded-lg text-sm">
+                    <SelectValue placeholder="Priority" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white shadow-lg border-gray-200 rounded-lg">
+                    <SelectItem value="all">All Priorities</SelectItem>
+                    <SelectItem value="Low">Low</SelectItem>
+                    <SelectItem value="Medium">Medium</SelectItem>
+                    <SelectItem value="High">High</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={tempStatusFilter} onValueChange={setTempStatusFilter}>
+                  <SelectTrigger className="w-full bg-white border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded-lg text-sm">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white shadow-lg border-gray-200 rounded-lg">
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="Pending">Pending</SelectItem>
+                    <SelectItem value="In Progress">In Progress</SelectItem>
+                    <SelectItem value="Completed">Completed</SelectItem>
+                  </SelectContent>
+                </Select>
+                {showAssignedFilter && (
+                  <Select value={tempAssignedToFilter} onValueChange={setTempAssignedToFilter}>
+                    <SelectTrigger className="w-full bg-white border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded-lg text-sm">
+                      <SelectValue placeholder="Assignee" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white shadow-lg border-gray-200 rounded-lg">
+                      <SelectItem value="all">All Assignee</SelectItem>
+                      {assignedMembers.map((name) => (
+                        <SelectItem key={name} value={name}>
+                          {name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-between bg-white border-gray-300 hover:bg-gray-100 rounded-lg text-sm",
+                        !tempDateFrom && "text-gray-500"
+                      )}
+                    >
+                      {tempDateFrom ? format(tempDateFrom, "PPP") : <span>From Date</span>}
+                      <CalendarIcon className="ml-2 h-4 w-4 text-black" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 bg-white shadow-lg border-gray-200 rounded-lg">
+                    <Calendar
+                      mode="single"
+                      selected={tempDateFrom}
+                      onSelect={setTempDateFrom}
+                      initialFocus
+                      className="rounded-lg text-black"
+                    />
+                  </PopoverContent>
+                </Popover>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-between bg-white border-gray-300 hover:bg-gray-100 rounded-lg text-sm",
+                        !tempDateTo && "text-gray-500"
+                      )}
+                    >
+                      {tempDateTo ? format(tempDateTo, "PPP") : <span>To Date</span>}
+                      <CalendarIcon className="ml-2 h-4 w-4 text-black" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 bg-white shadow-lg border-gray-200 rounded-lg">
+                    <Calendar
+                      mode="single"
+                      selected={tempDateTo}
+                      onSelect={setTempDateTo}
+                      initialFocus
+                      className="rounded-lg text-black"
+                    />
+                  </PopoverContent>
+                </Popover>
+                <Button
+                  onClick={handleApplyFilters}
+                  className="bg-blue-600 text-white hover:bg-blue-700 rounded-lg text-sm"
+                >
+                  Apply Filters
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
 
-              <Select value={tempAssignedToFilter} onValueChange={setTempAssignedToFilter}>
-                <SelectTrigger className="w-full bg-white border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded-lg text-black text-sm sm:text-base">
-                  <SelectValue placeholder="Assigned To" />
-                </SelectTrigger>
-                <SelectContent className="bg-white shadow-lg border-gray-200 rounded-lg text-black">
-                  <SelectItem value="all">All Assigned</SelectItem>
-                  {assignedMembers.map((name) => (
-                    <SelectItem key={name} value={name}>
-                      {name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              )
-             }
-
-
-
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-between bg-white border-gray-300 hover:bg-gray-100 rounded-lg text-black text-sm sm:text-base",
-                      !tempDateFrom && "text-gray-500"
-                    )}
-                  >
-                    {tempDateFrom ? format(tempDateFrom, "PPP") : <span>From Date</span>}
-                    <CalendarIcon className="ml-2 h-4 w-4 text-black" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 bg-white shadow-lg border-gray-200 rounded-lg">
-                  <Calendar
-                    mode="single"
-                    selected={tempDateFrom}
-                    onSelect={setTempDateFrom}
-                    initialFocus
-                    className="rounded-lg text-black"
-                  />
-                </PopoverContent>
-              </Popover>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-between bg-white border-gray-300 hover:bg-gray-100 rounded-lg text-black text-sm sm:text-base",
-                      !tempDateTo && "text-gray-500"
-                    )}
-                  >
-                    {tempDateTo ? format(tempDateTo, "PPP") : <span>To Date</span>}
-                    <CalendarIcon className="ml-2 h-4 w-4 text-black" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 bg-white shadow-lg border-gray-200 rounded-lg">
-                  <Calendar
-                    mode="single"
-                    selected={tempDateTo}
-                    onSelect={setTempDateTo}
-                    initialFocus
-                    className="rounded-lg text-black"
-                  />
-                </PopoverContent>
-              </Popover>
-              <Button
-                onClick={handleApplyFilters}
-                className="bg-blue-600 text-white hover:bg-blue-700 rounded-lg text-sm sm:text-base"
-              >
-                Apply Filters
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        {/* Table Container */}
-        <div className="flex-1 overflow-auto rounded-lg border border-gray-200 shadow-lg bg-white">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-blue-600 hover:bg-blue-700">
-                {[
-                  { label: "SL. No", key: "" },
-                  { label: "Task ID", key: "task_id" },
-                  { label: "Title", key: "title" },
-                  { label: "Assigned To", key: "assignedToDetails.memberName" },
-                  { label: "Priority", key: "priority" },
-                  { label: "Deadline", key: "deadline" },
-                  { label: "Status", key: "status" },
-                  { label: "Actions", key: "" },
-                ].map((col, i) => (
-                  <TableHead
-                    key={i}
-                    className="text-white font-semibold uppercase tracking-wider cursor-pointer px-2 py-2 text-xs sm:text-sm"
-                    onClick={() => col.key && handleSort(col.key)}
-                  >
-                    {col.label}
-                    {sortConfig.key === col.key && (sortConfig.direction === "asc" ? " ▲" : " ▼")}
+          {/* Table */}
+          <div className="overflow-x-auto rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-gray-50 text-xs sm:text-sm">
+                  <TableHead className="font-bold text-gray-700 w-[60px]">S.N</TableHead>
+                  <TableHead className="font-bold text-gray-700 cursor-pointer w-[300px] sm:w-[400px]" onClick={() => handleSort("title")}>
+                    Title
                   </TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedTasks.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={8} className="text-center text-gray-500 py-6 text-xs sm:text-base">
-                    No tasks found
-                  </TableCell>
+                  <TableHead className="font-bold text-gray-700 cursor-pointer w-[100px]" onClick={() => handleSort("assignedToDetails.memberName")}>
+                    Assignee
+                  </TableHead>
+                  <TableHead className="font-bold text-gray-700 cursor-pointer w-[100px]" onClick={() => handleSort("priority")}>
+                    Priority
+                  </TableHead>
+                  <TableHead className="font-bold text-gray-700 cursor-pointer w-[150px]" onClick={() => handleSort("deadline")}>
+                    Deadline
+                  </TableHead>
+                  <TableHead className="font-bold text-gray-700 cursor-pointer w-[100px]" onClick={() => handleSort("status")}>
+                    Status
+                  </TableHead>
+                  <TableHead className="font-bold text-gray-700 w-[60px]">Action</TableHead>
                 </TableRow>
-              ) : (
-                paginatedTasks.map((task, index) => (
-                  <TableRow key={task._id} className="hover:bg-gray-50">
-                    <TableCell className="px-2 py-2 text-xs sm:text-base text-black">{(currentPage - 1) * tasksPerPage + index + 1}</TableCell>
-                    <TableCell className="px-2 py-2 text-xs sm:text-base text-black">{task.task_id}</TableCell>
-                    <TableCell className="px-2 py-2 text-xs sm:text-base text-black">{task.title}</TableCell>
-                    <TableCell className="px-2 py-2 text-xs sm:text-base text-black">
-                      {task?.assignedToDetails?.memberName || "N/A"}
+              </TableHeader>
+              <TableBody>
+                {paginatedTasks.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center text-gray-500 py-6 text-sm">
+                      No tasks found
                     </TableCell>
-                    <TableCell className="px-2 py-2">
-                      <span
-                        className={cn(
-                          "px-2 py-1 inline-flex text-xs font-medium rounded-full",
-                          task.priority === "Low" ? "bg-green-100 text-green-800" :
-                          task.priority === "Medium" ? "bg-yellow-100 text-yellow-800" :
-                          task.priority === "High" ? "bg-red-100 text-red-800" : "bg-gray-100 text-black"
-                        )}
-                      >
-                        {task.priority || "N/A"}
-                      </span>
-                    </TableCell>
-                    <TableCell className="px-2 py-2 text-xs sm:text-base text-black">
-                      {formatDateTimeIST(task.deadline) || "N/A"}
-                    </TableCell>
-                    <TableCell className="px-2 py-2">
-                      <span
-                        className={cn(
-                          "px-2 py-1 inline-flex text-xs font-medium rounded-full",
-                          task.status === "Pending" ? "bg-yellow-100 text-yellow-800" :
-                          task.status === "In Progress" ? "bg-blue-100 text-blue-800" :
-                          task.status === "Completed" ? "bg-green-100 text-green-800" : "bg-gray-100 text-black"
-                        )}
-                      >
-                        {task.status || "N/A"}
-                      </span>
-                    </TableCell>
-                    <TableCell className="px-2 py-2">
-                      <div className="flex items-center gap-2">
+                  </TableRow>
+                ) : (
+                  paginatedTasks.map((task, index) => (
+                    <TableRow key={task._id} 
+                    // className="text-xs sm:text-sm cursor-pointer " 
+                    className="
+    text-xs sm:text-sm cursor-pointer
+    transition-all duration-300 ease-in-out
+    hover:bg-gray-600 hover:bg-opacity-100
+    hover:shadow-md 
+  "
+                    onClick={() => handleViewTask(task.task_id)}>
+                      <TableCell>{(currentPage - 1) * tasksPerPage + index + 1}</TableCell>
+                      <TableCell>
+                            <span className="line-clamp-1">{truncateTitle(task.title)}</span>
+                       
+                      </TableCell>
+                      <TableCell>
                         <Tooltip>
-                          <TooltipTrigger asChild>
+                          <TooltipTrigger>
+                            <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-medium">
+                              {getInitials(task?.assignedToDetails?.memberName)}
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent className="bg-gradient-to-br from-blue-50 to-indigo-50/80 backdrop-blur-sm border border-blue-100/50 shadow-xl shadow-blue-100/20 max-w-[300px] p-4 rounded-xl">
+                            <p className="text-xs text-gray-700">{task?.assignedToDetails?.memberName || "N/A"}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TableCell>
+                      <TableCell>
+                        <span
+                          className={cn(
+                            "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
+                            task.priority === "Low" ? "bg-green-200 text-green-800" :
+                            task.priority === "Medium" ? "bg-yellow-200 text-yellow-800" :
+                            task.priority === "High" ? "bg-red-200 text-red-800" : "bg-gray-200 text-gray-800"
+                          )}
+                        >
+                          {task.priority || "N/A"}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                            <p className="text-xs text-gray-700">{formatDateTimeIST(task.deadline) || "N/A"}</p>
+                       
+                      </TableCell>
+                      <TableCell>
+                        <span
+                          className={cn(
+                            "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
+                            task.status === "Pending" ? "bg-yellow-200 text-yellow-800" :
+                            task.status === "In Progress" ? "bg-blue-200 text-blue-800" :
+                            task.status === "Completed" ? "bg-green-200 text-green-800" : "bg-gray-200 text-gray-800"
+                          )}
+                        >
+                          {task.status || "N/A"}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
                             <Button
                               variant="ghost"
-                              size="icon"
-                              onClick={() => handleViewTask(task.task_id)}
-                              className="text-blue-600 hover:text-blue-800 hover:bg-gray-100 rounded-full"
+                              size="sm"
+                              className="h-6 w-6 sm:h-8 sm:w-8 p-0"
                             >
-                              <Eye className="h-4 w-4" />
+                              <MoreVertical className="h-4 w-4 text-gray-600" />
                             </Button>
-                          </TooltipTrigger>
-                          <TooltipContent className="bg-black text-white border-none">View Task</TooltipContent>
-                        </Tooltip>
-                        {(currentUser?.role === "cpc" || isTeamLead) && (
-                          <>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="bg-white shadow-lg border-gray-200 rounded-lg">
+                            <DropdownMenuItem
+                              onClick={() => handleViewTask(task.task_id)}
+                              className="flex items-center gap-2 cursor-pointer focus:bg-blue-50 text-sm"
+                            >
+                              <Eye className="w-4 h-4 text-blue-700" />
+                              View
+                            </DropdownMenuItem>
+                            {(currentUser?.role === "cpc" || isTeamLead) && (
+                              <>
+                                <DropdownMenuItem
                                   onClick={() => handleEditTask(task.task_id)}
-                                  className="text-green-600 hover:text-green-800 hover:bg-green-100 rounded-full"
+                                  className="flex items-center gap-2 cursor-pointer focus:bg-green-50 text-sm"
                                 >
-                                  <Edit className="h-4 w-4" />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent className="bg-black text-white border-none">Edit Task</TooltipContent>
-                            </Tooltip>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
+                                  <Edit className="w-4 h-4 text-green-700" />
+                                  Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
                                   onClick={() => openDeleteModal(task.task_id)}
-                                  className="text-red-600 hover:text-red-800 hover:bg-red-100 rounded-full"
+                                  className="flex items-center gap-2 cursor-pointer focus:bg-red-50 text-sm"
                                 >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent className="bg-black text-white border-none">Delete Task</TooltipContent>
-                            </Tooltip>
-                          </>
-                        )}
-                      </div>
-                    </TableCell>
-  
-
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
-
-        {/* Pagination */}
-        <div className="flex items-center justify-between mt-4">
-          <div className="text-xs sm:text-sm text-gray-600">
-            Showing {Math.min((currentPage - 1) * tasksPerPage + 1, filteredTasks.length)}-
-            {Math.min(currentPage * tasksPerPage, filteredTasks.length)} of {filteredTasks.length} tasks
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-              className="bg-white text-black border-gray-300 hover:bg-gray-100 rounded-lg text-xs sm:text-sm"
-            >
-              Previous
-            </Button>
-            {getPaginationButtons().map((page) => (
-              <Button
-                key={page}
-                variant={currentPage === page ? "default" : "outline"}
-                size="sm"
-                onClick={() => handlePageChange(page)}
-                className={cn(
-                  "w-8 h-8 p-0",
-                  currentPage === page
-                    ? "bg-blue-600 text-white hover:bg-blue-700"
-                    : "bg-white text-black border-gray-300 hover:bg-gray-100",
-                  "rounded-lg text-xs sm:text-sm"
+                                  <Trash2 className="w-4 h-4 text-red-700" />
+                                  Delete
+                                </DropdownMenuItem>
+                              </>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))
                 )}
-              >
-                {page}
-              </Button>
-            ))}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className="bg-white text-black border-gray-300 hover:bg-gray-100 rounded-lg text-xs sm:text-sm"
-            >
-              Next
-            </Button>
+              </TableBody>
+            </Table>
           </div>
-        </div>
 
-        {/* Delete Modal */}
-        {showDeleteModal && (currentUser?.role === "cpc" || isTeamLead) && (
-          <>
-            <div className="fixed inset-0 bg-black/60 z-40" onClick={closeDeleteModal} />
-            <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
-              <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-md shadow-lg border border-gray-200">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-base sm:text-xl font-bold text-black">Confirm Deletion</h3>
+          {/* Pagination */}
+          <div className="flex flex-col sm:flex-row items-center justify-between px-2 py-4 gap-4 sm:gap-0">
+            <div className="text-xs sm:text-sm text-gray-700">
+              Showing {Math.min((currentPage - 1) * tasksPerPage + 1, filteredTasks.length)}-
+              {Math.min(currentPage * tasksPerPage, filteredTasks.length)} of {filteredTasks.length} tasks
+            </div>
+            {totalPages > 1 && (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="bg-white text-black border-gray-300 hover:bg-gray-100 rounded-lg text-xs sm:text-sm"
+                >
+                  Previous
+                </Button>
+                {getPaginationButtons().map((page) => (
                   <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={closeDeleteModal}
-                    className="text-black hover:bg-gray-100 rounded-full"
+                    key={page}
+                    variant={currentPage === page ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => handlePageChange(page)}
+                    className={cn(
+                      "w-8 h-8 p-0",
+                      currentPage === page
+                        ? "bg-blue-600 text-white hover:bg-blue-700"
+                        : "bg-white text-black border-gray-300 hover:bg-gray-100",
+                      "rounded-lg text-xs sm:text-sm"
+                    )}
                   >
-                    <X className="h-4 w-4 sm:h-5 sm:w-5" />
+                    {page}
                   </Button>
-                </div>
-                <p className="text-xs sm:text-base text-black mb-6">
-                  Are you sure you want to delete this task? This action cannot be undone.
-                </p>
-                <div className="flex justify-end gap-2 sm:gap-4">
+                ))}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="bg-white text-black border-gray-300 hover:bg-gray-100 rounded-lg text-xs sm:text-sm"
+                >
+                  Next
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {/* Delete Confirmation Dialog */}
+          {(currentUser?.role === "cpc" || isTeamLead) && (
+            <Dialog open={showDeleteModal} onOpenChange={closeDeleteModal}>
+              <DialogContent className="max-w-[95vw] sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                    <AlertCircle className="w-5 h-5 text-red-500" />
+                    Delete Task
+                  </DialogTitle>
+                  <p className="text-sm text-gray-600">
+                    Are you sure you want to delete this task? This action cannot be undone.
+                  </p>
+                </DialogHeader>
+                <div className="flex gap-3 pt-4">
                   <Button
                     variant="outline"
                     onClick={closeDeleteModal}
-                    className="bg-white text-black border-gray-300 hover:bg-gray-100 rounded-lg text-xs sm:text-base"
+                    className="flex-1 text-sm bg-white text-black border-gray-300 hover:bg-gray-100 rounded-lg"
                   >
                     Cancel
                   </Button>
                   <Button
                     variant="destructive"
                     onClick={handleDeleteTask}
-                    className="bg-red-600 text-white hover:bg-red-700 rounded-lg text-xs sm:text-base"
+                    className="flex-1 text-sm bg-red-600 text-white hover:bg-red-700 rounded-lg"
                   >
+                    <Trash2 className="w-4 h-4 mr-2" />
                     Delete
                   </Button>
                 </div>
-              </div>
-            </div>
-          </>
-        )}
+              </DialogContent>
+            </Dialog>
+          )}
 
-        {/* Create Task Modal */}
-        {(currentUser?.role === "cpc" ||currentUser?.position === "Team Lead"|| isTeamLead) && (
-          <CreateTaskModal
-            projectId={projectId}
-            project={project}
-            isOpen={showCreateTaskModal}
-            onClose={() => setShowCreateTaskModal(false)}
-          />
-        )}
+          {/* Create Task Modal */}
+          {(currentUser?.role === "cpc" || isTeamLead) && (
+            <CreateTaskModal
+              projectId={projectId}
+              project={project}
+              isOpen={showCreateTaskModal}
+              onClose={() => setShowCreateTaskModal(false)}
+            />
+          )}
+        </div>
       </div>
     </TooltipProvider>
   );

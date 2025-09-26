@@ -3,13 +3,18 @@
 
 
 
+
+
+
+
+
 "use client";
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { formatDateTimeIST, formatDateUTC } from "@/utils/formatDate";
+import { formatDateTimeIST } from "@/utils/formatDate";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useDispatch, useSelector } from "react-redux";
-import { resolveBug, clearErrors, fetchBugByEmployeeId } from "@/features/bugSlice";
+import { resolveBug, clearErrors, getBugById } from "@/features/bugSlice";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -18,18 +23,27 @@ import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-const BugDetailsViewModal = ({ isOpen, onOpenChange, bug }) => {
+const BugDetailsViewModal = ({ isOpen, onOpenChange, bugId }) => {
   const { currentUser } = useCurrentUser();
   const dispatch = useDispatch();
   const router = useRouter();
+
+  const { bugDetails } = useSelector((state) => state.bugs);
   const loading = useSelector((state) => state.bugs.loading?.bugResolve);
   const error = useSelector((state) => state.bugs.error?.bugResolve);
-  const [delayReason, setDelayReason] = useState(bug?.delayReason || "");
+  const [delayReason, setDelayReason] = useState(bugDetails?.delayReason || "");
   const [resolutionNote, setResolutionNote] = useState("");
 
   useEffect(() => {
-    if (isOpen && bug) {
-      setDelayReason(bug?.delayReason || "");
+    if (bugId) {
+      dispatch(getBugById(bugId));
+    }
+  }, [dispatch, bugId]);
+
+
+  useEffect(() => {
+    if (isOpen && bugDetails) {
+      setDelayReason(bugDetails?.delayReason || "");
       setResolutionNote("");
     }
 
@@ -38,10 +52,10 @@ const BugDetailsViewModal = ({ isOpen, onOpenChange, bug }) => {
         dispatch(clearErrors());
       }
     };
-  }, [dispatch, isOpen, bug, error]);
+  }, [dispatch, isOpen, bugDetails, error]);
 
   const handleResolveBug = () => {
-    if (!bug) return;
+    if (!bugDetails) return;
 
     if (!resolutionNote.trim()) {
       toast.error("Please provide a resolution note.");
@@ -49,7 +63,7 @@ const BugDetailsViewModal = ({ isOpen, onOpenChange, bug }) => {
     }
 
     // Convert bug deadline to Date object
-    const bugDeadlineDate = new Date(bug.deadline);
+    const bugDeadlineDate = new Date(bugDetails.deadline);
     // Get current date and time
     const now = new Date();
     // Check if deadline has passed
@@ -59,20 +73,13 @@ const BugDetailsViewModal = ({ isOpen, onOpenChange, bug }) => {
     const bugDeadlineISO = bugDeadlineDate.toISOString();
     const nowISO = now.toISOString();
 
-    // Log for debugging
-    // if (isPastDeadline) {
-    //   console.log(`Deadline passed! Deadline: ${bugDeadlineISO}, Current: ${nowISO}`);
-    // } else {
-    //   console.log(`Deadline not yet passed. Deadline: ${bugDeadlineISO}, Current: ${nowISO}`);
-    // }
-
     if (isPastDeadline && !delayReason.trim()) {
       toast.error("Please provide a reason for the delay.");
       return;
     }
     
     const payload = {
-      bugId: bug.bug_id,
+      bugId: bugDetails.bug_id,
       resolutionNote,
       ...(isPastDeadline && { delayReason }),
     };
@@ -87,15 +94,16 @@ const BugDetailsViewModal = ({ isOpen, onOpenChange, bug }) => {
     });
   };
 
-  if (!bug) {
+  if (!bugDetails) {
     return null;
   }
 
-  const isAssignedToCurrentUser = currentUser?.id === bug?.assignedTo;
-  const isResolved = bug.status.toLowerCase() === "resolved";
+  const isAssignedToCurrentUser = currentUser?.id === bugDetails?.assignedTo;
+  const isResolved = (bugDetails?.status || "").toLowerCase() === "resolved";
+  // const isResolved = bugDetails?.status === "resolved";
 
   // Convert bug deadline to Date object
-  const bugDeadlineDate = bug.deadline ? new Date(bug.deadline) : null;
+  const bugDeadlineDate = bugDetails.deadline ? new Date(bugDetails.deadline) : null;
   // Get current date and time
   const now = new Date();
   // Check if deadline has passed
@@ -105,13 +113,12 @@ const BugDetailsViewModal = ({ isOpen, onOpenChange, bug }) => {
   if (bugDeadlineDate) {
     const bugDeadlineISO = bugDeadlineDate.toISOString();
     const nowISO = now.toISOString();
-
   }
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="w-full max-w-full h-[100vh] sm:max-w-4xl sm:max-h-[90vh] md:max-w-5xl bg-white shadow-lg border-gray-200 rounded-lg text-black overflow-y-auto">
-        <DialogHeader className="px-4 py-3 sm:px-6 sm:py-4  sticky top-0 ">
+        <DialogHeader className="px-4 py-3 sm:px-6 sm:py-4 sticky top-0">
           <DialogTitle className="text-gray-800 text-lg font-bold flex items-center gap-2">
             <Bug className="h-5 w-5" />
             Bug Details
@@ -124,7 +131,7 @@ const BugDetailsViewModal = ({ isOpen, onOpenChange, bug }) => {
               <FileText className="h-3 w-3" />
               Bug ID
             </Label>
-            <p className="text-xs text-black p-2">{bug.bug_id}</p>
+            <p className="text-xs text-black p-2">{bugDetails.bug_id}</p>
           </div>
 
           {/* Status */}
@@ -133,7 +140,7 @@ const BugDetailsViewModal = ({ isOpen, onOpenChange, bug }) => {
               <CheckCircle className="h-3 w-3" />
               Status
             </Label>
-            <p className="text-xs text-black p-2">{bug.status || "N/A"}</p>
+            <p className="text-xs text-black p-2">{bugDetails.status || "N/A"}</p>
           </div>
 
           {/* Priority */}
@@ -142,11 +149,11 @@ const BugDetailsViewModal = ({ isOpen, onOpenChange, bug }) => {
               <AlertCircle className="h-3 w-3" />
               Priority
             </Label>
-            <p className="text-xs text-black p-2">{bug.priority || "N/A"}</p>
+            <p className="text-xs text-black p-2">{bugDetails.priority || "N/A"}</p>
           </div>
 
           {/* Deadline */}
-          {bug.deadline && (
+          {bugDetails.deadline && (
             <div className="flex flex-col">
               <Label className="text-xs font-bold text-gray-800 mb-1 flex items-center gap-1">
                 <Calendar className="h-3 w-3" />
@@ -154,13 +161,10 @@ const BugDetailsViewModal = ({ isOpen, onOpenChange, bug }) => {
               </Label>
               <div className="flex items-center gap-2">
                 <p className="text-xs text-black p-2">
-                  {formatDateTimeIST(bug.deadline) || "N/A"}
-
-
+                  {formatDateTimeIST(bugDetails.deadline) || "N/A"}
                 </p>
                 {/* Overdue indicator */}
-              
-                {isOverdue && bug?.status!=="Resolved" &&(
+                {isOverdue && bugDetails?.status !== "Resolved" && (
                   <span className="px-2 py-1 rounded-full bg-red-100 text-red-600 text-xs font-medium flex items-center gap-1">
                     <AlertCircle className="h-3 w-3" />
                     Overdue
@@ -171,75 +175,72 @@ const BugDetailsViewModal = ({ isOpen, onOpenChange, bug }) => {
           )}
 
           {/* Assigned To */}
-          {bug?.assignedToDetails?.memberName && (
+          {bugDetails?.assignedToDetails?.memberName && (
             <div className="flex flex-col">
               <Label className="text-xs font-bold text-gray-800 mb-1 flex items-center gap-1">
                 <User className="h-3 w-3" />
                 Assigned To
               </Label>
-              <p className="text-xs text-black p-2">{bug.assignedToDetails.memberName}</p>
+              <p className="text-xs text-black p-2">{bugDetails.assignedToDetails.memberName}</p>
             </div>
           )}
 
           {/* Project Id */}
-          {bug.projectId && (
+          {bugDetails.projectId && (
             <div className="flex flex-col">
               <Label className="text-xs font-bold text-gray-800 mb-1 flex items-center gap-1">
                 <FileText className="h-3 w-3" />
                 Project Id
               </Label>
-              <p className="text-xs text-black p-2">{bug.projectId}</p>
+              <p className="text-xs text-black p-2">{bugDetails.projectId}</p>
             </div>
           )}
 
           {/* Created At */}
-          {bug.createdAt && (
+          {bugDetails.createdAt && (
             <div className="flex flex-col">
               <Label className="text-xs font-bold text-gray-800 mb-1 flex items-center gap-1">
                 <ClockIcon className="h-3 w-3" />
                 Created At
               </Label>
-              <p className="text-xs text-black p-2">{formatDateTimeIST(bug.createdAt)}</p>
+              <p className="text-xs text-black p-2">{formatDateTimeIST(bugDetails.createdAt)}</p>
             </div>
           )}
 
-{/* Download Attachment */}
-{bug.attachmentLinks && (
-  <div className="mt-2">
-    <Label className="text-xs font-bold text-gray-800 mb-1">Attachment</Label>
-    <a
-      href={bug.attachmentLinks}
-      download
-      className="inline-flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-md text-sm text-gray-800 font-medium transition-colors"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-4 w-4 text-blue-600"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-      >
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" />
-      </svg>
-      <span>Download</span>
-    </a>
-  </div>
-)}
-
+          {/* Download Attachment */}
+          {bugDetails.attachmentLinks && (
+            <div className="mt-2">
+              <Label className="text-xs font-bold text-gray-800 mb-1">Attachment</Label>
+              <a
+                href={bugDetails.attachmentLinks}
+                download
+                className="inline-flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-md text-sm text-gray-800 font-medium transition-colors"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4 text-blue-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" />
+                </svg>
+                <span>Download</span>
+              </a>
+            </div>
+          )}
 
           {/* Task Ref - Clickable */}
           <div className="flex flex-col relative">
             <Label className="text-xs font-bold text-gray-800 mb-1 flex items-center gap-1">
               <FileText className="h-3 w-3" />
-              Task Ref
+              Reference
             </Label>
-
             <div className="inline-flex items-center gap-2">
               {/* Task ID chip */}
               <span className="px-2 py-0.5 rounded-full bg-blue-500 text-white text-xs">
-                {bug.taskRef}
+                {bugDetails.taskRef}
               </span>
-
               {/* Redirect icon with tooltip */}
               <span className="relative group cursor-pointer text-blue-500">
                 <ExternalLinkIcon className="w-4 h-4" />
@@ -247,7 +248,7 @@ const BugDetailsViewModal = ({ isOpen, onOpenChange, bug }) => {
                   Click to view full task
                 </span>
                 <span
-                  onClick={() => router.push(`/task/${bug.taskRef}`)}
+                  onClick={() => router.push(`/task/${bugDetails.taskRef}`)}
                   className="absolute inset-0"
                 />
               </span>
@@ -260,32 +261,32 @@ const BugDetailsViewModal = ({ isOpen, onOpenChange, bug }) => {
               <FileText className="h-3 w-3" />
               Title
             </Label>
-            <p className="text-sm text-black p-3 ">{bug.title}</p>
+            <p className="text-sm text-black p-3">{bugDetails.title}</p>
           </div>
 
           {/* Description - Larger Area */}
-          {bug.description && (
+          {bugDetails.description && (
             <div className="sm:col-span-2 lg:col-span-3 flex flex-col">
               <Label className="text-xs font-bold text-gray-800 mb-1 flex items-center gap-1">
                 <FileText className="h-3 w-3" />
                 Description
               </Label>
-              <p className="text-sm text-black p-3 rounded-md  border border-gray-200 whitespace-pre-wrap break-words">
-                {bug.description}
+              <p className="text-sm text-black p-3 rounded-md border border-gray-200 whitespace-pre-wrap break-words">
+                {bugDetails.description}
               </p>
             </div>
           )}
 
           {/* Delay Reason - View or Input, Larger Area */}
-          {(isOverdue && !isResolved && isAssignedToCurrentUser) || bug.delayReason ? (
+          {(isOverdue && !isResolved && isAssignedToCurrentUser) || bugDetails.delayReason ? (
             <div className="sm:col-span-2 lg:col-span-3 flex flex-col">
               <Label className="text-xs font-bold text-gray-800 mb-1 flex items-center gap-1">
                 <Clock className="h-3 w-3" />
                 Delay Reason
               </Label>
-              {isResolved || bug.delayReason ? (
-                <p className="text-sm text-black p-3 rounded-md  border border-gray-200">
-                  {bug.delayReason || "N/A"}
+              {isResolved || bugDetails.delayReason ? (
+                <p className="text-sm text-black p-3 rounded-md border border-gray-200">
+                  {bugDetails.delayReason || "N/A"}
                 </p>
               ) : (
                 <Textarea
@@ -299,9 +300,9 @@ const BugDetailsViewModal = ({ isOpen, onOpenChange, bug }) => {
           ) : null}
 
           {/* Resolution Note - Input if Resolving, View if Resolved, Larger Area */}
-          {(!isResolved && isAssignedToCurrentUser) || bug.resolutionNote ? (
+          {(!isResolved && isAssignedToCurrentUser) || bugDetails.resolutionNote ? (
             <div className="sm:col-span-2 lg:col-span-3 flex flex-col">
-              <Label className="text-xs font-bold text-gray-800 mb-1 flex items-center gap-1">
+              <Label className="text-xs font-bold text-gray-800 mb-sticky top-0 1 flex items-center gap-1">
                 <CheckCircle className="h-3 w-3" />
                 Resolution Note
               </Label>
@@ -313,8 +314,8 @@ const BugDetailsViewModal = ({ isOpen, onOpenChange, bug }) => {
                   placeholder="Enter resolution note"
                 />
               ) : (
-                <p className="text-sm text-black p-3 rounded-md  border border-gray-200">
-                  {bug.resolutionNote}
+                <p className="text-sm text-black p-3 rounded-md border border-gray-200">
+                  {bugDetails.resolutionNote}
                 </p>
               )}
             </div>
@@ -351,3 +352,8 @@ const BugDetailsViewModal = ({ isOpen, onOpenChange, bug }) => {
 };
 
 export default BugDetailsViewModal;
+
+
+
+
+
