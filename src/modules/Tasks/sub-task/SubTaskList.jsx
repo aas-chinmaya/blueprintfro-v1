@@ -29,7 +29,6 @@ import EditSubtaskModal from "@/modules/Tasks/sub-task/EditSubTaskModal";
 import DeleteSubtaskModal from "@/modules/Tasks/sub-task/DeleteSubTaskModal";
 import { fetchSubTasksByTaskId } from "@/features/subTaskSlice";
 import { useRouter } from "next/navigation";
-import { formatDateUTC } from "@/utils/formatDate";
 
 const SubTaskList = ({ task, taskId, projectId, isTaskClosed }) => {
   const router = useRouter();
@@ -52,6 +51,8 @@ const SubTaskList = ({ task, taskId, projectId, isTaskClosed }) => {
   useEffect(() => {
     if (taskId) {
       dispatch(fetchSubTasksByTaskId(taskId));
+     
+      
     }
   }, [dispatch, subtasks?.length, taskId]);
 

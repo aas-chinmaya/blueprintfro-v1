@@ -160,11 +160,11 @@ const searchParams = useSearchParams();
   const statusOptions = ["In Progress", "Completed"];
 
   const tabs = [
-    // {
-    //   id: "overview",
-    //   label: "Overview",
-    //   icon: <FiInfo className="h-5 w-5" />,
-    // },
+    {
+      id: "overview",
+      label: "Overview",
+      icon: <FiInfo className="h-5 w-5" />,
+    },
     {
       id: "details",
       label: "Detail's",
@@ -332,7 +332,7 @@ const canEditStatus = currentUser?.role?.toLowerCase() === "cpc" || isTeamLead |
 
                     </div>
                   
-                    {project.data.clientId?.trim() && (
+                    {project?.data.clientId?.trim() && (
                       <div className="flex items-center gap-3">
                         <FiUser className="h-4 w-4 text-[#38b000]" />
                         <span className="font-semibold text-gray-900 w-28">
@@ -374,16 +374,16 @@ const canEditStatus = currentUser?.role?.toLowerCase() === "cpc" || isTeamLead |
               ) : (
                 <div
                   className={`inline-block px-3 py-1 rounded-md text-sm font-medium ${
-                    project.data.status === "Completed"
+                    project?.data.status === "Completed"
                       ? "bg-blue-100 text-blue-800"
-                      : project.data.status === "In Progress"
+                      : project?.data.status === "In Progress"
                       ? "bg-blue-100 text-blue-800"
-                      : project.data.status === "Cancelled"
+                      : project?.data.status === "Cancelled"
                       ? "bg-red-100 text-red-800"
                       : "bg-gray-100 text-gray-800"
                   }`}
                 >
-                  {project.data.status}
+                  {project?.data.status}
                 </div>
               )}
             </TooltipProvider>
@@ -393,7 +393,7 @@ const canEditStatus = currentUser?.role?.toLowerCase() === "cpc" || isTeamLead |
                       <span className="font-semibold text-gray-900 w-28">
                         Team Lead:
                       </span>
-                      <span>{project.data.teamLeadName || "Unassigned"}</span>
+                      <span>{project?.data.teamLeadName || "Unassigned"}</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <FiCalendar className="h-4 w-4 text-[#38b000]" />
@@ -401,49 +401,49 @@ const canEditStatus = currentUser?.role?.toLowerCase() === "cpc" || isTeamLead |
                         Onboarding Date:
                       </span>
                       <span>
-                        {project.data.createdAt
-                          ? formatDateUTC(project.data.createdAt)
+                        {project?.data.createdAt
+                          ? formatDateUTC(project?.data.createdAt)
                           : "N/A"}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                {(project.data.startDate ||
-                  project.data.endDate ||
-                  project.data.attachments?.length > 0) && (
+                {(project?.data.startDate ||
+                  project?.data.endDate ||
+                  project?.data.attachments?.length > 0) && (
                     <div className="space-y-4 pb-3">
                       <h3 className="text-lg font-bold text-back flex items-center gap-2">
                         <FiCalendar className="h-5 w-5 text-blue-600" />
                         Timeline & Attachments
                       </h3>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-600 pl-7">
-                        {project.data.startDate && (
+                        {project?.data.startDate && (
                           <div className="flex items-center gap-3">
                             <FiCalendar className="h-4 w-4 text-[#38b000]" />
                             <span className="font-semibold text-gray-900 w-35">
                               Start Date:
                             </span>
                             <span>
-                              {formatDateUTC(project.data.startDate)}
+                              {formatDateUTC(project?.data.startDate)}
                             </span>
                           </div>
                         )}
-                        {project.data.endDate && (
+                        {project?.data.endDate && (
                           <div className="flex items-center gap-3">
                             <FiCalendar className="h-4 w-4 text-[#38b000]" />
                             <span className="font-semibold text-gray-900 w-35">
                               End Date:
                             </span>
                             <span>
-                            {formatDateUTC(project.data.endDate)}
+                            {formatDateUTC(project?.data.endDate)}
                             </span>
                           </div>
                         )}
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-600 pl-7">
                       
-                      {project.data.expectedEndDate && (
+                      {project?.data.expectedEndDate && (
                         <div className="flex items-center gap-3">
                           <FiCalendar className="h-4 w-4 text-[#38b000]" />
                           <span className="font-semibold text-gray-900 w-35">
@@ -451,13 +451,13 @@ const canEditStatus = currentUser?.role?.toLowerCase() === "cpc" || isTeamLead |
                           </span>
                           <span>
                             
-                           {formatDateUTC(project.data.expectedEndDate)}
+                           {formatDateUTC(project?.data.expectedEndDate)}
                           </span>
                         </div>
                       )}
                       </div>
                                     
-                    {project.data.attachments?.length > 0 && (
+                    {project?.data.attachments?.length > 0 && (
                       <div className="flex flex-col gap-3 pl-7">
                         <div className="flex items-center gap-3">
                           <FileStack className="h-4 w-4 text-[#38b000]" />
@@ -466,7 +466,7 @@ const canEditStatus = currentUser?.role?.toLowerCase() === "cpc" || isTeamLead |
                           </span>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                          {project.data.attachments.map((attachment, index) => (
+                          {project?.data.attachments.map((attachment, index) => (
                             <Button
                               key={index}
                               onClick={() =>
@@ -495,9 +495,9 @@ const canEditStatus = currentUser?.role?.toLowerCase() === "cpc" || isTeamLead |
                     <FiFileText className="h-5 w-5 text-blue-600" />
                     Description
                   </h3>
-                  {project.data.description ? (
+                  {project?.data.description ? (
                     <p className="text-sm text-gray-600 leading-relaxed pl-7">
-                      {project.data.description}
+                      {project?.data.description}
                     </p>
                   ) : (
                     <p className="text-sm text-gray-500 italic pl-7">
@@ -511,8 +511,8 @@ const canEditStatus = currentUser?.role?.toLowerCase() === "cpc" || isTeamLead |
             <TabsContent value="task" className="min-h-[calc(100vh-200px)]">
               <div className="space-y-4">
                 <AllTaskListByProjectId
-                  project={project.data}
-                  projectId={project.data.projectId}
+                  project={project?.data}
+                  projectId={project?.data.projectId}
                 />
               </div>
             </TabsContent>
@@ -538,7 +538,7 @@ const canEditStatus = currentUser?.role?.toLowerCase() === "cpc" || isTeamLead |
               <div className="space-y-4">
 
 
-                <ProjectwiseAllMeetingAndMom project={project.data} projectId={projectId} teamLeadId={project?.data?.teamLeadId} />
+                <ProjectwiseAllMeetingAndMom projectName={project?.data?.projectName} project={project?.data} projectId={projectId} teamLeadId={project?.data?.teamLeadId} />
               </div>
             </TabsContent>
 
@@ -546,7 +546,7 @@ const canEditStatus = currentUser?.role?.toLowerCase() === "cpc" || isTeamLead |
               <div className="space-y-4">
 
 
-                <DocumentManager project={project.data} projectId={projectId} teamLeadId={project?.data?.teamLeadId} />
+                <DocumentManager project={project?.data} projectId={projectId} teamLeadId={project?.data?.teamLeadId} />
               </div>
             </TabsContent>
 
@@ -555,8 +555,8 @@ const canEditStatus = currentUser?.role?.toLowerCase() === "cpc" || isTeamLead |
               <div className="space-y-4">
 
 
-                <Dashboard project={project.data} projectId={projectId} teamLeadId={project?.data?.teamLeadId} />
-                {/* <ProjectOverview project={project.data} projectId={projectId} teamLeadId={project?.data?.teamLeadId} /> */}
+                {/* <Dashboard project={project?.data} projectId={projectId} teamLeadId={project?.data?.teamLeadId} /> */}
+                <ProjectOverview project={project.data} projectId={projectId} teamLeadId={project?.data?.teamLeadId} />
               </div>
             </TabsContent>
 
@@ -615,7 +615,7 @@ const canEditStatus = currentUser?.role?.toLowerCase() === "cpc" || isTeamLead |
               </SelectTrigger>
               <SelectContent>
                 {statusOptions
-                  .filter((status) => status !== project.data.status)
+                  .filter((status) => status !== project?.data.status)
                   .map((status) => (
                     <SelectItem key={status} value={status}>
                       {status}

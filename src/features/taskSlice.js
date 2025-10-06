@@ -183,9 +183,8 @@ export const updateTaskStatus = createAsyncThunk(
         }
       );
 
-      if (!response.data || !response.data.task) {
-        throw new Error('Failed to update task status');
-      }
+     
+
 
       return response.data.task;
     } catch (error) {
