@@ -616,7 +616,7 @@ const TaskView = () => {
       dispatch(fetchTaskById(task_id));
       dispatch(fetchSubTasksByTaskId(task_id));
     }
-  }, [dispatch, task_id]);
+  }, [dispatch, task_id,task?.status]);
 
   const canShowUpdateStatusButton = () => {
     return isAssigned && task?.status !== "In Progress" && !!getStatusButtonText(task?.status);
@@ -988,6 +988,7 @@ const TaskView = () => {
                          
                           {task.bugs.map((entry, index) => (
                             <li
+                            onClick={()=>router.push()}
                               key={index}
                               className="bg-slate-50 border border-slate-200 rounded-lg p-3 shadow-sm hover:shadow-md transition-all"
                             >

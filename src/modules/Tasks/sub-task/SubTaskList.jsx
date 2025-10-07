@@ -29,8 +29,17 @@ import EditSubtaskModal from "@/modules/Tasks/sub-task/EditSubTaskModal";
 import DeleteSubtaskModal from "@/modules/Tasks/sub-task/DeleteSubTaskModal";
 import { fetchSubTasksByTaskId } from "@/features/subTaskSlice";
 import { useRouter } from "next/navigation";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { fetchProjectById } from "@/features/projectSlice";
+import { cn } from "@/lib/utils";
 
 const SubTaskList = ({ task, taskId, projectId, isTaskClosed }) => {
+    const { project, status, successMessage } = useSelector(
+    (state) => state.project
+  );
+
+
+    const { currentUser, isTeamLead } = useCurrentUser(project?.data?.teamLeadId);
   const router = useRouter();
   const dispatch = useDispatch();
   const { subtasks, loading, error } = useSelector((state) => state.subTask);
@@ -54,7 +63,15 @@ const SubTaskList = ({ task, taskId, projectId, isTaskClosed }) => {
      
       
     }
+       
+    
   }, [dispatch, subtasks?.length, taskId]);
+  useEffect(() => {
+  
+          dispatch(fetchProjectById(projectId));
+   
+    
+  }, [dispatch]);
 
   // Modal states
   const [openEdit, setOpenEdit] = useState(false);
@@ -113,7 +130,8 @@ const SubTaskList = ({ task, taskId, projectId, isTaskClosed }) => {
           <ListTodo className="mr-2 h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
           Subtasks
         </h3>
-        {!isTaskClosed ? (
+      
+        {!isTaskClosed &&  currentUser?.role === "cpc"||currentUser?.role === "Team Lead" || isTeamLead ? (
           <Button
             className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9"
             onClick={() => setOpenAdd(true)}
@@ -177,6 +195,23 @@ const SubTaskList = ({ task, taskId, projectId, isTaskClosed }) => {
                 
               </div>
               <div className="flex items-center gap-1 sm:gap-2">
+                                           {st.isResolved === false && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span
+                        className={cn(
+                          "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium whitespace-nowrap cursor-default",
+                          "bg-red-100 text-red-700"
+                        )}
+                      >
+                        Bug Found
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent className="text-xs px-2 py-1 rounded shadow-md bg-red-600 text-white">
+                      Bug is active. Resolve now!
+                    </TooltipContent>
+                  </Tooltip>
+                )}
                 <Badge
                   variant={getStatusVariant(st.status)}
                   className="text-xs sm:text-sm"

@@ -59,7 +59,7 @@ import { formatDateUTC } from "@/utils/formatDate";
 import TeamManagement from "../Teams/TeamManagement";
 import DocumentManager from "../document/project-doc/DocumentManager";
 import ProjectOverview from "./ProjectOverview";
-import Dashboard from "./ProjectOverview";
+
 
 export default function ViewProjectById({ projectId }) {
 
@@ -555,7 +555,6 @@ const canEditStatus = currentUser?.role?.toLowerCase() === "cpc" || isTeamLead |
               <div className="space-y-4">
 
 
-                {/* <Dashboard project={project?.data} projectId={projectId} teamLeadId={project?.data?.teamLeadId} /> */}
                 <ProjectOverview project={project.data} projectId={projectId} teamLeadId={project?.data?.teamLeadId} />
               </div>
             </TabsContent>

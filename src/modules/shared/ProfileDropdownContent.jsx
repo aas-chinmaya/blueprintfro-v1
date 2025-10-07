@@ -29,6 +29,7 @@ import {
   clearProfileImageUrl,
 } from "@/features/shared/profileSlice";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { IconDashboard } from "@tabler/icons-react";
 
 export default function ProfileDropdownContent({ user }) {
   const dispatch = useDispatch();
@@ -140,15 +141,13 @@ export default function ProfileDropdownContent({ user }) {
 
       {/* Actions */}
       <div className="flex flex-col gap-2 p-4 mt-auto">
-        <Button variant="ghost" className="justify-start gap-2 w-full">
-          <Settings size={16} /> Settings
+        <Button variant="ghost"  onClick={()=>router.push("/dashboard")} className="justify-start gap-2 w-full">
+          <IconDashboard size={16} /> Dashboard
         </Button>
         <Button onClick={()=>router.push("/inbox")} variant="ghost" className="justify-start gap-2 w-full">
           <Bell size={16} /> Notifications
         </Button>
-        <Button variant="ghost" className="justify-start gap-2 w-full">
-          <HelpCircle size={16} /> Help
-        </Button>
+    
 
         <Separator />
 

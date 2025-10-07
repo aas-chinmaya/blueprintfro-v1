@@ -18,6 +18,8 @@ export const useCurrentUser = (projectTeamLeadId = null) => {
 const isTeamLead =
     projectTeamLeadId &&
     currentUser.id === projectTeamLeadId;
+  
+    
   return {
     currentUser,
     loading,

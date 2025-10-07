@@ -499,56 +499,56 @@ function MeetingsPage({ id }) {
     }
   }, [contactMeetings])
 
-  // const handleCreate = async (newMeeting) => {
-  //   try {
-  //     await dispatch(createMeeting(newMeeting)).unwrap()
-  //     setModalState(null)
-  //     toast.success('Meeting created successfully!')
-  //   } catch (error) {
-  //     if (error?.response?.data?.message === 'User not authorized') {
-  //       setModalState('paymentGate')
-  //     } else {
-  //       toast.error('Failed to create meeting.')
-  //       console.error('Error creating meeting:', error)
-  //     }
-  //   }
-  // }
-
-  
-const handleCreate = async (newMeeting) => {
-  try {
-    // Step 1: Create the meeting
-    await dispatch(createMeeting(newMeeting)).unwrap();
-    console.log('Meeting created successfully:', newMeeting);
-
-    // Step 2: Verify payment status
-    const verifyResult = await dispatch(verifyStatusCode(contactId)).unwrap();
-    console.log('Payment status verified:', verifyResult);
-
-    // Set boolean flag based on verifyStatusCode response
-    const hasPaymentRecord = verifyResult && verifyResult.status !== 'unpaid';
-    console.log('Has payment record:', hasPaymentRecord);
-
-    // Step 3: Delete payment link if a valid record exists
-    if (hasPaymentRecord) {
-      await dispatch(deletePaymentLink(contactId)).unwrap();
-      console.log('Payment link deleted successfully');
-    } else {
-      console.log('No valid payment record found, skipping delete payment link');
-    }
-
-    // Show success toast only after all steps are completed
-    setModalState(null);
-    toast.success('Meeting created successfully!');
-  } catch (error) {
-    if (error?.response?.data?.message === 'User not authorized') {
-      setModalState('paymentGate');
-    } else {
-      toast.error('Failed to create meeting.');
-      console.error('Error during meeting creation process:', error);
+  const handleCreate = async (newMeeting) => {
+    try {
+      await dispatch(createMeeting(newMeeting)).unwrap()
+      setModalState(null)
+      toast.success('Meeting created successfully!')
+    } catch (error) {
+      if (error?.response?.data?.message === 'User not authorized') {
+        setModalState('paymentGate')
+      } else {
+        toast.error('Failed to create meeting.')
+        console.error('Error creating meeting:', error)
+      }
     }
   }
-};
+
+  
+// const handleCreate = async (newMeeting) => {
+//   try {
+//     // Step 1: Create the meeting
+//     await dispatch(createMeeting(newMeeting)).unwrap();
+//     console.log('Meeting created successfully:', newMeeting);
+
+//     // Step 2: Verify payment status
+//     const verifyResult = await dispatch(verifyStatusCode(contactId)).unwrap();
+//     console.log('Payment status verified:', verifyResult);
+
+//     // Set boolean flag based on verifyStatusCode response
+//     const hasPaymentRecord = verifyResult && verifyResult.status !== 'unpaid';
+//     console.log('Has payment record:', hasPaymentRecord);
+
+//     // Step 3: Delete payment link if a valid record exists
+//     if (hasPaymentRecord) {
+//       await dispatch(deletePaymentLink(contactId)).unwrap();
+//       console.log('Payment link deleted successfully');
+//     } else {
+//       console.log('No valid payment record found, skipping delete payment link');
+//     }
+
+//     // Show success toast only after all steps are completed
+//     setModalState(null);
+//     toast.success('Meeting created successfully!');
+//   } catch (error) {
+//     if (error?.response?.data?.message === 'User not authorized') {
+//       setModalState('paymentGate');
+//     } else {
+//       toast.error('Failed to create meeting.');
+//       console.error('Error during meeting creation process:', error);
+//     }
+//   }
+// };
 
 
 
