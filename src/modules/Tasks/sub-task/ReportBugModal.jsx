@@ -29,8 +29,9 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { createBug } from "@/features/bugSlice";
 
-const ReportBugModal = ({ onClose, task_id, subtask_id, isOpen = true }) => {
+const ReportBugModal = ({ onClose,onBugReported, task_id, subtask_id, isOpen = true }) => {
   const dispatch = useDispatch();
+
 
   const [bugTitle, setBugTitle] = useState("");
   const [bugDescription, setBugDescription] = useState("");
@@ -108,6 +109,7 @@ const ReportBugModal = ({ onClose, task_id, subtask_id, isOpen = true }) => {
       await dispatch(createBug(formData)).unwrap();
       toast.success("Bug reported successfully!");
       resetForm();
+      if (onBugReported) onBugReported(); // <--- Refresh parent state
       onClose();
     } catch (err) {
       toast.error(err?.message || "Failed to create bug.");

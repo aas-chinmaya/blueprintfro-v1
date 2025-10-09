@@ -751,6 +751,10 @@ const SubTaskFullDetailsPage = ({ task_id, subtask_id }) => {
       {/* Report Bug Modal */}
       {isReportBugOpen && (
         <ReportBugModal 
+        onBugReported={() => {
+      dispatch(getSubTaskById({ taskId: task_id, subTaskId: subtask_id }));
+       // optional if subtasks might change
+    }}
           onClose={() => setIsReportBugOpen(false)} 
           subtask_id={subtask_id}
           subtaskTitle={subTask?.title}

@@ -13,17 +13,17 @@ import { useDispatch, useSelector } from 'react-redux';
 import { deleteSubTask } from '@/features/subTaskSlice';
 import { toast } from 'sonner';
 
-const DeleteSubtaskModal = ({ open, setOpen, subtask, taskId }) => {
+const DeleteSubtaskModal = ({onSubtaskDelete, open, setOpen, subtask, taskId }) => {
   const dispatch = useDispatch();
   const { loading: subTaskLoading, error: subTaskError } = useSelector((state) => state.subTask);
 
   const confirmDelete = async () => {
     try {
-      console.log('subtask to delete:', subtask, taskId);
       
       await dispatch(deleteSubTask({ taskId, subtaskId: subtask?.subtask_id }));
       toast.success('Subtask deleted successfully');
       setOpen(false);
+      onSubtaskDelete()
     } catch (err) {
       toast.error(subTaskError || 'Failed to delete subtask');
     }

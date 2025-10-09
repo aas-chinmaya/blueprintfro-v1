@@ -20,7 +20,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
-const CreateTaskModal = ({ projectId, project, onClose, isOpen }) => {
+const CreateTaskModal = ({ onTaskAssingn,projectId, project, onClose, isOpen }) => {
   const dispatch = useDispatch();
   const { teamsByProject: teams, status: teamStatus } = useSelector((state) => state.team);
   const { status: taskStatus, error: taskError } = useSelector((state) => state.task);
@@ -212,6 +212,7 @@ const CreateTaskModal = ({ projectId, project, onClose, isOpen }) => {
         };
 
         await dispatch(createTask(taskData)).unwrap();
+       onTaskAssingn();
         toast.success("Task assigned successfully!");
         onClose();
       } catch (err) {

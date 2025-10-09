@@ -31,6 +31,7 @@ import quotationReducer from '@/features/quotationSlice';
 import clientReducer from '@/features/clientSlice';
 import paymentReducer from '@/features/meeting/paymentSlice'
 import causeReducer from '@/features/causeSlice';
+import projectAnalyticsReducer from "@/features/projectAnalyticsSlice";
 
 
 //master table
@@ -81,7 +82,7 @@ export const store = configureStore({
     //dashboard
   dash: dashReducer,
   dashboard:dashboardReducer,
-  
+  projectAnalytics: projectAnalyticsReducer,
 
   // module reducer
  contact: contactReducer,

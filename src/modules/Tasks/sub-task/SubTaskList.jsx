@@ -131,7 +131,7 @@ const SubTaskList = ({ task, taskId, projectId, isTaskClosed }) => {
           Subtasks
         </h3>
       
-        {!isTaskClosed &&  currentUser?.role === "cpc"||currentUser?.role === "Team Lead" || isTeamLead ? (
+        {/* {!isTaskClosed &&  currentUser?.role === "cpc"||currentUser?.role === "Team Lead" || isTeamLead ? (
           <Button
             className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9"
             onClick={() => setOpenAdd(true)}
@@ -146,7 +146,16 @@ const SubTaskList = ({ task, taskId, projectId, isTaskClosed }) => {
           >
             <Lock className="mr-1 h-3 w-3 sm:h-4 sm:w-4" /> Read-Only
           </Badge>
-        )}
+        )} */}
+        {!isTaskClosed && (
+  <Button
+    className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9"
+    onClick={() => setOpenAdd(true)}
+  >
+    <Plus className="mr-1 h-3 w-3 sm:h-4 sm:w-4" /> Add
+  </Button>
+)}
+
       </div>
       <div className="mb-3">
         <div className="flex justify-between items-center mb-2">
@@ -304,6 +313,10 @@ const SubTaskList = ({ task, taskId, projectId, isTaskClosed }) => {
       />
       {selectedSubtask && (
         <EditSubtaskModal
+        onSubtaskEdit={() => {
+  
+      dispatch(fetchSubTasksByTaskId(taskId)); // optional if subtasks might change
+    }}
           open={openEdit}
           setOpen={setOpenEdit}
           subtask={selectedSubtask}
@@ -314,6 +327,10 @@ const SubTaskList = ({ task, taskId, projectId, isTaskClosed }) => {
       )}
       {selectedSubtask && (
         <DeleteSubtaskModal
+             onSubtaskDelete={() => {
+  
+      dispatch(fetchSubTasksByTaskId(taskId)); // optional if subtasks might change
+    }}
           open={openDelete}
           setOpen={setOpenDelete}
           subtask={selectedSubtask}

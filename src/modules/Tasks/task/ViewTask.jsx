@@ -616,7 +616,7 @@ const TaskView = () => {
       dispatch(fetchTaskById(task_id));
       dispatch(fetchSubTasksByTaskId(task_id));
     }
-  }, [dispatch, task_id,task?.status]);
+  }, [dispatch, task_id,task?.status,setIsReportBugOpen]);
 
   const canShowUpdateStatusButton = () => {
     return isAssigned && task?.status !== "In Progress" && !!getStatusButtonText(task?.status);
@@ -1031,7 +1031,12 @@ const TaskView = () => {
         </Card>
       </div>
       {isReportBugOpen && (
-        <ReportBugModal onClose={() => setIsReportBugOpen(false)} task_id={task_id}  />
+        <ReportBugModal
+        onBugReported={() => {
+      dispatch(fetchTaskById(task_id));
+   
+    }}
+        onClose={() => setIsReportBugOpen(false)} task_id={task_id}  />
       )}
       
       <Dialog open={isDelayDialogOpen} onOpenChange={setIsDelayDialogOpen}>
