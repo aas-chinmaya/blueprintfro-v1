@@ -82,6 +82,7 @@ const SubTaskFullDetailsPage = ({ task_id, subtask_id }) => {
 
   // Get task details for navigation
   const task = useSelector((state) => state.task.currentTask);
+console.log(task?.status);
 
   const [isReportBugOpen, setIsReportBugOpen] = useState(false);
   const [showFullDesc, setShowFullDesc] = useState(false);
@@ -420,7 +421,43 @@ const SubTaskFullDetailsPage = ({ task_id, subtask_id }) => {
           <CardContent className="p-4 sm:p-6">
             {/* Enhanced Actions Bar at Top */}
             <div className="flex flex-wrap justify-end gap-2 mb-6">
-              {canShowUpdateStatusButton() && (
+              {task?.status === "In Progress" && canShowUpdateStatusButton() && (
+  <Tooltip>
+    <TooltipTrigger asChild>
+      <Button
+        size="sm"
+        className={`${getStatusColor(subTask?.status)} text-white rounded-full shadow-md ${
+          updating ? "opacity-50 cursor-not-allowed" : ""
+        }`}
+        onClick={() => handleUpdateStatus(getNextStatus(subTask?.status))}
+        disabled={updating}
+      >
+        <DynamicIcon 
+          icon={getStatusIcon(subTask?.status)} 
+          className="h-4 w-4" 
+        />
+        <span className="ml-2 hidden sm:inline">
+          {getStatusButtonText(subTask?.status)}
+        </span>
+      </Button>
+    </TooltipTrigger>
+    <TooltipContent side="bottom">
+      <div className="text-left">
+        <p className="font-medium">{getStatusButtonText(subTask?.status)}</p>
+        <p className="text-xs text-muted-foreground mt-1">
+          Current: {subTask?.status}
+        </p>
+        {subTask?.status === "Completed" && (
+          <p className="text-xs text-muted-foreground mt-1">
+            Will reopen as In Progress
+          </p>
+        )}
+      </div>
+    </TooltipContent>
+  </Tooltip>
+)}
+
+              {/* {canShowUpdateStatusButton() && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
@@ -454,8 +491,8 @@ const SubTaskFullDetailsPage = ({ task_id, subtask_id }) => {
                     </div>
                   </TooltipContent>
                 </Tooltip>
-              )}
-
+              )} */}
+{/* 
               {canShowMarkResolvedButton() && (
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -475,7 +512,7 @@ const SubTaskFullDetailsPage = ({ task_id, subtask_id }) => {
                   </TooltipTrigger>
                   <TooltipContent>Mark the Subtask as Resolved and Close</TooltipContent>
                 </Tooltip>
-              )}
+              )} */}
 
               {canShowReportBugButton() && (
                 <Tooltip>

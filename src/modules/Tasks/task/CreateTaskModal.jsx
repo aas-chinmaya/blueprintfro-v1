@@ -319,7 +319,7 @@ const CreateTaskModal = ({ onTaskAssingn,projectId, project, onClose, isOpen }) 
               <div>
                 <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
                   <CalendarIcon className="h-4 w-4 text-blue-500 mr-2" />
-                  Date <span className="text-red-500 ml-1">*</span>
+                  Deadline <span className="text-red-500 ml-1">*</span>
                 </label>
                 <Popover>
                   <PopoverTrigger asChild>

@@ -836,7 +836,7 @@ const TaskView = () => {
                     </Tooltip>
                   )}
 
-                  {canShowMarkResolvedButton() && (
+                  {/* {canShowMarkResolvedButton() && (
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
@@ -851,7 +851,7 @@ const TaskView = () => {
                       </TooltipTrigger>
                       <TooltipContent>Mark the Task as Resolved and Close</TooltipContent>
                     </Tooltip>
-                  )}
+                  )} */}
 
                   {canShowReportBugButton() && (
                     <Tooltip>

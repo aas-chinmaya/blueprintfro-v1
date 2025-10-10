@@ -200,7 +200,7 @@ const ReportBugModal = ({ onClose,onBugReported, task_id, subtask_id, isOpen = t
 
               <div>
                 <label className="flex items-center text-sm font-medium mb-2">
-                  <CalendarIcon className="h-4 w-4 text-blue-500 mr-2" /> Date{" "}
+                  <CalendarIcon className="h-4 w-4 text-blue-500 mr-2" /> Deadline{" "}
                   <span className="text-red-500 ml-1">*</span>
                 </label>
                 <Popover>
