@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Eye, EyeOff, AlertCircle, Home, Shield, LogInIcon } from "lucide-react";
+import { Eye, EyeOff, AlertCircle, Home, Shield, LogInIcon, CornerUpLeft } from "lucide-react";
 import { toast } from "sonner";
 
 const LoginForm = () => {
@@ -150,6 +150,27 @@ const LoginForm = () => {
       setIsResendLoading(false);
     }
   };
+const handleOtpPaste = (e) => {
+  const pasteData = e.clipboardData.getData("Text");
+  // Extract only digits
+  const digits = pasteData.replace(/\D/g, "");
+  if (digits.length === 0) {
+    e.preventDefault(); // No digits to paste
+    toast.error("OTP must contain numbers only");
+    return;
+  }
+  // Take only first 6 digits
+  const otpDigits = digits.slice(0, 6).split("");
+  setOtp(otpDigits);
+  setOtpError("");
+
+  // Focus last filled input
+  const lastInput = document.getElementById(`otp-input-${otpDigits.length - 1}`);
+  lastInput?.focus();
+
+  e.preventDefault(); // Prevent default paste
+};
+
 
   const handleOtpChange = (e, index) => {
     const val = e.target.value.replace(/\D/g, "").trim().slice(-1);
@@ -200,6 +221,7 @@ const LoginForm = () => {
           value={digit}
           onChange={(e) => handleChange(e, index)}
           onKeyDown={(e) => handleKeyDown(e, index)}
+          onPaste={index === 0 ? handleOtpPaste : undefined} // Only first input handles paste
           className="w-14 h-16 text-center text-2xl font-bold border-3 border-blue-300 rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-200 shadow-lg transform transition-all duration-200 hover:scale-105 hover:shadow-xl"
           autoFocus={index === 0}
         />
@@ -257,6 +279,29 @@ const LoginForm = () => {
                 {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
               </button>
             </div>
+{/* ✅ Back to Home (left) + Forgot Password (right) Links */}
+<div className="flex justify-between items-center mt-6">
+  {/* Back to Home */}
+  <button
+    type="button"
+    onClick={handleBackToHome}
+    title="Go back to Home Page"
+    className="flex items-center gap-1 text-sm font-semibold text-gray-700 hover:text-blue-700 underline cursor-pointer transition-all duration-200"
+  >
+    <CornerUpLeft size={16} className="text-gray-700" />
+    <span>Back to Home</span>
+  </button>
+
+  {/* Forgot Password */}
+  <button
+    type="button"
+    onClick={() => window.open("https://hr.aasint.com/forgot-password", "_blank")}
+    title="Forgot your password form HRMS Portal"
+    className="text-sm font-semibold text-blue-600 hover:text-blue-800 underline cursor-pointer transition-all duration-200"
+  >
+    Forgot Password?
+  </button>
+</div>
 
             <Button type="submit" disabled={isLoginLoading} className="w-full bg-gradient-to-r from-blue-600 via-blue-600 to-blue-600 hover:from-blue-700 hover:to-blue-700 font-bold rounded-2xl h-14 text-lg text-white shadow-xl transition-all hover:scale-105 active:scale-95 hover:shadow-2xl">
               {isLoginLoading ? <div className="flex items-center gap-3"><div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>Sending OTP...</div>
@@ -264,12 +309,7 @@ const LoginForm = () => {
             </Button>
           </form>
 
-          <div className="text-center mt-8">
-            <button onClick={handleBackToHome}
-              className="inline-flex items-center space-x-2 text-blue-700 font-bold bg-gradient-to-r from-blue-100 to-blue-100 px-6 py-3 rounded-full shadow-md border border-blue-200">
-              <Home size={25} /><span>Back to Home</span>
-            </button>
-          </div>
+         
         </>
       )}
 

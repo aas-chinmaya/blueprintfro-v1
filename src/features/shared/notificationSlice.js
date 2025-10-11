@@ -99,6 +99,13 @@ const notificationSlice = createSlice({
       state.error.update = null;
       state.error.updateAll = null;
     },
+    // Optimistic update for single notification
+  markAsReadLocal: (state, action) => {
+    const id = action.payload;
+    state.items = state.items.map(n =>
+      n._id === id ? { ...n, read: true } : n
+    );
+  },
   },
   extraReducers: (builder) => {
     builder
@@ -181,7 +188,7 @@ const notificationSlice = createSlice({
   },
 });
 
-export const { clearErrors } = notificationSlice.actions;
+export const { clearErrors,markAsReadLocal  } = notificationSlice.actions;
 export default notificationSlice.reducer;
 
 
