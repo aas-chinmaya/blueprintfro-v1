@@ -659,24 +659,6 @@
 //   );
 // }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -741,6 +723,7 @@ import { formatDateUTC } from "@/utils/formatDate";
 import DocumentManager from "../document/project-doc/DocumentManager";
 import ProjectMetrics from "./ProjectMetrics";
 import TeamManagement from "../Teams/TeamManagement";
+import ProjectBudgetWrapper from "../budget/project/projectBudgetWrapper";
 
 export default function ViewProjectById({ projectId }) {
   const router = useRouter();
@@ -755,7 +738,9 @@ export default function ViewProjectById({ projectId }) {
   }, [activeTab, projectId, router, initialTab]);
 
   const dispatch = useDispatch();
-  const { project, status, error, successMessage } = useSelector((state) => state.project);
+  const { project, status, error, successMessage } = useSelector(
+    (state) => state.project
+  );
   const { currentUser, isTeamLead } = useCurrentUser(project?.data?.teamLeadId);
 
   useEffect(() => {
@@ -769,7 +754,8 @@ export default function ViewProjectById({ projectId }) {
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
-  const [hasFetchedAfterStatusChange, setHasFetchedAfterStatusChange] = useState(false);
+  const [hasFetchedAfterStatusChange, setHasFetchedAfterStatusChange] =
+    useState(false);
   const [showLoader, setShowLoader] = useState(true);
 
   useEffect(() => {
@@ -788,7 +774,13 @@ export default function ViewProjectById({ projectId }) {
       setStatusUpdateMessage(error.statusChange);
       setTimeout(() => setStatusUpdateMessage(""), 3000);
     }
-  }, [successMessage, error.statusChange, dispatch, projectId, hasFetchedAfterStatusChange]);
+  }, [
+    successMessage,
+    error.statusChange,
+    dispatch,
+    projectId,
+    hasFetchedAfterStatusChange,
+  ]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -827,6 +819,7 @@ export default function ViewProjectById({ projectId }) {
 
   const tabs = [
     { id: "details", label: "Details", icon: <FiInfo className="h-5 w-5" /> },
+    { id: "budget", label: "Budget", icon: <FiInfo className="h-5 w-5" /> },
     { id: "team", label: "Team", icon: <FiUsers className="h-5 w-5" /> },
     { id: "task", label: "Task", icon: <FiList className="h-5 w-5" /> },
     { id: "bug", label: "Bug", icon: <BugIcon className="h-5 w-5" /> },
@@ -919,7 +912,9 @@ export default function ViewProjectById({ projectId }) {
                       currentUser?.position === "Team Lead") && (
                       <Button
                         size="sm"
-                        onClick={() => router.push(`/project/edit/${projectId}`)}
+                        onClick={() =>
+                          router.push(`/project/edit/${projectId}`)
+                        }
                         className="bg-blue-600 text-white hover:bg-blue-700"
                         aria-label="Edit project"
                       >
@@ -946,7 +941,10 @@ export default function ViewProjectById({ projectId }) {
                           ? project.data.category
                               .toLowerCase()
                               .split(" ")
-                              .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                              .map(
+                                (word) =>
+                                  word.charAt(0).toUpperCase() + word.slice(1)
+                              )
                               .join(" ")
                           : "N/A"}
                       </span>
@@ -1060,7 +1058,9 @@ export default function ViewProjectById({ projectId }) {
                           <span className="font-semibold text-gray-900 w-35">
                             Expected End Date:
                           </span>
-                          <span>{formatDateUTC(project?.data.expectedEndDate)}</span>
+                          <span>
+                            {formatDateUTC(project?.data.expectedEndDate)}
+                          </span>
                         </div>
                       )}
                     </div>
@@ -1073,19 +1073,28 @@ export default function ViewProjectById({ projectId }) {
                           </span>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                          {project?.data.attachments.map((attachment, index) => (
-                            <Button
-                              key={index}
-                              onClick={() => handleDownload(attachment.url, attachment.filename)}
-                              disabled={isDownloading}
-                              variant="outline"
-                              className="flex items-center gap-2 w-full justify-start text-left border-gray-200 hover:bg-blue-50"
-                              aria-label={`Download ${attachment.filename}`}
-                            >
-                              <FiDownload className="h-5 w-5 text-blue-600" />
-                              <span className="text-gray-700 truncate">{attachment.filename}</span>
-                            </Button>
-                          ))}
+                          {project?.data.attachments.map(
+                            (attachment, index) => (
+                              <Button
+                                key={index}
+                                onClick={() =>
+                                  handleDownload(
+                                    attachment.url,
+                                    attachment.filename
+                                  )
+                                }
+                                disabled={isDownloading}
+                                variant="outline"
+                                className="flex items-center gap-2 w-full justify-start text-left border-gray-200 hover:bg-blue-50"
+                                aria-label={`Download ${attachment.filename}`}
+                              >
+                                <FiDownload className="h-5 w-5 text-blue-600" />
+                                <span className="text-gray-700 truncate">
+                                  {attachment.filename}
+                                </span>
+                              </Button>
+                            )
+                          )}
                         </div>
                       </div>
                     )}
@@ -1107,6 +1116,11 @@ export default function ViewProjectById({ projectId }) {
                     </p>
                   )}
                 </div>
+              </div>
+            </TabsContent>
+            <TabsContent value="budget" className="min-h-[calc(100vh-200px)]">
+              <div className="space-y-6">
+                <ProjectBudgetWrapper projectId={projectId}/>
               </div>
             </TabsContent>
 
@@ -1239,5 +1253,3 @@ export default function ViewProjectById({ projectId }) {
     </div>
   );
 }
-
-
