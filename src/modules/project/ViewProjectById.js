@@ -724,6 +724,7 @@ import DocumentManager from "../document/project-doc/DocumentManager";
 import ProjectMetrics from "./ProjectMetrics";
 import TeamManagement from "../Teams/TeamManagement";
 import ProjectBudgetWrapper from "../budget/project/projectBudgetWrapper";
+import App from "../budget/budgetWraper";
 
 export default function ViewProjectById({ projectId }) {
   const router = useRouter();
@@ -1120,7 +1121,8 @@ export default function ViewProjectById({ projectId }) {
             </TabsContent>
             <TabsContent value="budget" className="min-h-[calc(100vh-200px)]">
               <div className="space-y-6">
-                <ProjectBudgetWrapper projectId={projectId}/>
+                <App projectId={projectId} />
+                {/* <ProjectBudgetWrapper projectId={projectId}/> */}
               </div>
             </TabsContent>
 

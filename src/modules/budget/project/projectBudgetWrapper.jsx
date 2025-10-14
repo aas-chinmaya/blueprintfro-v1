@@ -1,48 +1,56 @@
 
-
-// components/ProjectBudgetWrapper.jsx
 "use client";
 
 import React, { useState } from "react";
-import { useSelector } from "react-redux";
-import { toast } from "sonner";
 import FundManagement from "./FundManagement";
-import CategoriesAndRequests from "./CategoriesAndRequests";
+import FundCategories from "./FundCategories";
+import BudgetRequests from "./BudgetRequests";
 
-const ProjectBudgetWrapper = ({ projectId }) => {
-  const project = useSelector((state) => state.project.project?.data);
-  const [isDistributionStarted, setIsDistributionStarted] = useState(false);
-
-  const handleStartDistribution = () => {
-    setIsDistributionStarted(true);
-    toast.success("Budget distribution started!");
-    // Add API call here if needed
-  };
+const ProjectBudgetWrapper = ({projectId}) => {
+  const [mainAccount, setMainAccount] = useState(100000);
+  const [activeTab, setActiveTab] = useState("categories"); // "categories" or "requests"
 
   return (
-    <div className="w-full bg-white flex flex-col">
-      {/* Dynamic inner section: only one visible at a time */}
-      {project?.status !== "pending" ? (
-        // ✅ Main Budget Overview Layout
-        <div className="flex flex-col lg:flex-row gap-6 min-h-screen p-4">
-          <FundManagement />
-          <CategoriesAndRequests />
+    <div className="w-full bg-white min-h-screen p-4 flex flex-col lg:flex-row gap-6">
+      {/* Left column */}
+      <div className="w-full lg:w-[30%] flex flex-col">
+        <FundManagement />
+      </div>
+
+      {/* Right column */}
+      <div className="w-full lg:w-[70%] flex flex-col ">
+        {/* Tabs */}
+        <div className="flex border-b border-gray-200 ">
+          <button
+            className={`px-4 py-2 text-sm font-medium cursor-pointer  ${
+              activeTab === "categories"
+                ? "border-b-2 border-blue-600 text-blue-600"
+                : "text-gray-600 hover:text-blue-600"
+            }`}
+            onClick={() => setActiveTab("categories")}
+          >
+            Fund Categories
+          </button>
+          <button
+            className={`px-4 py-2 text-sm font-medium cursor-pointer ${
+              activeTab === "requests"
+                ? "border-b-2 border-blue-600 text-blue-600"
+                : "text-gray-600 hover:text-blue-600"
+            }`}
+            onClick={() => setActiveTab("requests")}
+          >
+            Requests
+          </button>
         </div>
-      ) : (
-        // ✅ Compact card when project status is pending
-        <div className="min-h-[87vh] flex-1 flex items-center justify-center bg-gray-100 rounded-md shadow-sm p-4">
-          <div className="bg-white rounded-lg shadow-md p-6 flex flex-col items-center justify-center space-y-3 w-[250px]">
-            <span className="text-gray-700 font-medium text-sm">Budget Allocated</span>
-            <span className="text-xl font-bold text-green-600">₹50,000</span>
-            <button
-              onClick={handleStartDistribution}
-              className="cursor-pointer px-4 py-1 rounded-md bg-blue-500 text-white text-sm hover:bg-blue-600 transition"
-            >
-              Start Distribution
-            </button>
-          </div>
+
+        {/* Tab content */}
+        <div className="w-full flex flex-col">
+          {activeTab === "categories" && (
+            <FundCategories mainAccount={mainAccount} setMainAccount={setMainAccount} />
+          )}
+          {activeTab === "requests" && <BudgetRequests projectId={projectId} />}
         </div>
-      )}
+      </div>
     </div>
   );
 };

@@ -38,6 +38,8 @@ import projectAnalyticsReducer from "@/features/projectAnalyticsSlice";
 import slotReducer from '@/features/master/slotMasterSlice';
 import serviceReducer from '@/features/master/serviceMasterSlice';
 import industriesReducer from '@/features/master/industriesMasterSlice';
+import budgetReducer from '@/features/budget/budgetSlice'; // Import the budget request reducer
+import budgetRequestReducer from '@/features/budget/budgetRequestSlice'; // Import the budget request reducer
 
 
 
@@ -97,6 +99,8 @@ export const store = configureStore({
   team: teamReducer,
   bugs: bugReducer,
   cause: causeReducer,
+  budgetRequest: budgetRequestReducer,
+  budget: budgetReducer,
 
   payment: paymentReducer,
   documents: documentReducer,
