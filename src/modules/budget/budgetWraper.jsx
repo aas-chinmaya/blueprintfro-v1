@@ -179,7 +179,7 @@ export default function ProjectBudgetWrapper({ projectId, projectName }) {
   </Button>
   <Button
     onClick={() => setCreateCategoryDialogOpen(true)}
-    variant="outline"
+    // variant="outline"
   >
     <Plus className="h-4 w-4 mr-2" />
     New Category

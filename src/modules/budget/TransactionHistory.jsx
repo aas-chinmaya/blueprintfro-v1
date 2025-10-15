@@ -1,5 +1,4 @@
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -35,12 +34,9 @@ export function TransactionHistory({ transactions }) {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Transaction History</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="rounded-md border">
+  
+    
+        <div className="rounded-md border w-full">
           <Table>
             <TableHeader>
               <TableRow>
@@ -109,7 +105,6 @@ export function TransactionHistory({ transactions }) {
             </TableBody>
           </Table>
         </div>
-      </CardContent>
-    </Card>
+
   );
 }
