@@ -3,192 +3,6 @@
 
 
 
-
-// import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-// import { axiosInstance } from "@/lib/axios";
-
-// // ==============================
-// // Thunks
-// // ==============================
-
-// // Create a new budget request
-// export const createBudgetRequest = createAsyncThunk(
-//   "budgetRequest/create",
-//   async (payload, { rejectWithValue }) => {
-//     try {
-//       const res = await axiosInstance.post("/budget/create", payload);
-//       return res.data.data;
-//     } catch (err) {
-//       return rejectWithValue(err.response?.data || err.message);
-//     }
-//   }
-// );
-
-// // Fetch all budget requests
-// export const fetchBudgetRequests = createAsyncThunk(
-//   "budgetRequest/fetchAll",
-//   async (_, { rejectWithValue }) => {
-//     try {
-//       const res = await axiosInstance.get("/budget/getallbudget");
-//       return res.data.data;
-//     } catch (err) {
-//       return rejectWithValue(err.response?.data || err.message);
-//     }
-//   }
-// );
-
-// // Get a specific budget request by requestId
-// export const fetchBudgetRequestById = createAsyncThunk(
-//   "budgetRequest/fetchById",
-//   async (requestId, { rejectWithValue }) => {
-//     try {
-//       const res = await axiosInstance.get(`/budget/getbudget/${requestId}`);
-//       return res.data.data;
-//     } catch (err) {
-//       return rejectWithValue(err.response?.data || err.message);
-//     }
-//   }
-// );
-
-// // Update a budget request (full update)
-// export const updateBudgetRequest = createAsyncThunk(
-//   "budgetRequest/update",
-//   async ({ requestId, data }, { rejectWithValue }) => {
-//     try {
-//       const res = await axiosInstance.put(`/budget/updatebudget/${requestId}`, data);
-//       return res.data.data;
-//     } catch (err) {
-//       return rejectWithValue(err.response?.data || err.message);
-//     }
-//   }
-// );
-
-// // Delete a budget request
-// export const deleteBudgetRequest = createAsyncThunk(
-//   "budgetRequest/delete",
-//   async (requestId, { rejectWithValue }) => {
-//     try {
-//       await axiosInstance.delete(`/budget/deletebudget/${requestId}`);
-//       return requestId;
-//     } catch (err) {
-//       return rejectWithValue(err.response?.data || err.message);
-//     }
-//   }
-// );
-
-// // Update only the status field of a budget request
-// export const updateBudgetRequestStatus = createAsyncThunk(
-//   "budgetRequest/updateStatus",
-//   async ({ requestId, status, remarks }, { rejectWithValue }) => {
-//     try {
-//       const res = await axiosInstance.patch(`/budget/updatebudget/${requestId}/status`, { status, remarks });
-//       return res.data.data;
-//     } catch (err) {
-//       return rejectWithValue(err.response?.data || err.message);
-//     }
-//   }
-// );
-
-// // ==============================
-// // Slice
-// // ==============================
-
-// const budgetRequestSlice = createSlice({
-//   name: "budgetRequest",
-//   initialState: {
-//     requests: [],
-//     currentRequest: null,
-//     loading: false,
-//     error: null,
-//   },
-//   reducers: {
-//     clearCurrentRequest: (state) => {
-//       state.currentRequest = null;
-//     },
-//   },
-//   extraReducers: (builder) => {
-//     builder
-//       // Create
-//       .addCase(createBudgetRequest.pending, (state) => {
-//         state.loading = true;
-//         state.error = null;
-//       })
-//       .addCase(createBudgetRequest.fulfilled, (state, action) => {
-//         state.loading = false;
-//         state.requests.push(action.payload);
-//       })
-//       .addCase(createBudgetRequest.rejected, (state, action) => {
-//         state.loading = false;
-//         state.error = action.payload;
-//       })
-
-//       // Fetch all
-//       .addCase(fetchBudgetRequests.pending, (state) => {
-//         state.loading = true;
-//         state.error = null;
-//       })
-//       .addCase(fetchBudgetRequests.fulfilled, (state, action) => {
-//         state.loading = false;
-//         state.requests = action.payload;
-//       })
-//       .addCase(fetchBudgetRequests.rejected, (state, action) => {
-//         state.loading = false;
-//         state.error = action.payload;
-//       })
-
-//       // Fetch by ID
-//       .addCase(fetchBudgetRequestById.pending, (state) => {
-//         state.loading = true;
-//         state.error = null;
-//       })
-//       .addCase(fetchBudgetRequestById.fulfilled, (state, action) => {
-//         state.loading = false;
-//         state.currentRequest = action.payload;
-//       })
-//       .addCase(fetchBudgetRequestById.rejected, (state, action) => {
-//         state.loading = false;
-//         state.error = action.payload;
-//       })
-
-//       // Update
-//       .addCase(updateBudgetRequest.fulfilled, (state, action) => {
-//         state.loading = false;
-//         const idx = state.requests.findIndex((r) => r.requestId === action.payload.requestId);
-//         if (idx !== -1) state.requests[idx] = action.payload;
-//       })
-//       .addCase(updateBudgetRequest.rejected, (state, action) => {
-//         state.loading = false;
-//         state.error = action.payload;
-//       })
-
-//       // Delete
-//       .addCase(deleteBudgetRequest.fulfilled, (state, action) => {
-//         state.loading = false;
-//         state.requests = state.requests.filter((r) => r.requestId !== action.payload);
-//       })
-//       .addCase(deleteBudgetRequest.rejected, (state, action) => {
-//         state.loading = false;
-//         state.error = action.payload;
-//       })
-
-//       // Update status
-//       .addCase(updateBudgetRequestStatus.fulfilled, (state, action) => {
-//         state.loading = false;
-//         const idx = state.requests.findIndex((r) => r.requestId === action.payload.requestId);
-//         if (idx !== -1) state.requests[idx] = action.payload;
-//       })
-//       .addCase(updateBudgetRequestStatus.rejected, (state, action) => {
-//         state.loading = false;
-//         state.error = action.payload;
-//       });
-//   },
-// });
-
-// export const { clearCurrentRequest } = budgetRequestSlice.actions;
-// export default budgetRequestSlice.reducer;
-
-
-// src/features/budget/budgetRequestSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { axiosInstance } from "@/lib/axios";
 
@@ -209,7 +23,7 @@ export const createBudgetRequest = createAsyncThunk(
   }
 );
 
-// Fetch all budget requests (global, e.g., for admin)
+// Fetch all budget requests (global)
 export const fetchBudgetRequests = createAsyncThunk(
   "budgetRequest/fetchAll",
   async (_, { rejectWithValue }) => {
@@ -222,12 +36,12 @@ export const fetchBudgetRequests = createAsyncThunk(
   }
 );
 
-// Fetch budget requests by projectId (used in component)
+// Fetch budget requests by projectId
 export const fetchBudgetRequestsByProject = createAsyncThunk(
   "budgetRequest/fetchByProject",
   async (projectId, { rejectWithValue }) => {
     try {
-      const res = await axiosInstance.get(`/budget/project/${projectId}`);
+      const res = await axiosInstance.get(`/budget/getallbudget/project/${projectId}`);
       return res.data.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -248,7 +62,7 @@ export const fetchBudgetRequestById = createAsyncThunk(
   }
 );
 
-// Update a budget request (full update)
+// Update a budget request
 export const updateBudgetRequest = createAsyncThunk(
   "budgetRequest/update",
   async ({ requestId, data }, { rejectWithValue }) => {
@@ -261,7 +75,7 @@ export const updateBudgetRequest = createAsyncThunk(
   }
 );
 
-// Delete a budget request (soft delete)
+// Delete a budget request
 export const deleteBudgetRequest = createAsyncThunk(
   "budgetRequest/delete",
   async (requestId, { rejectWithValue }) => {
@@ -297,7 +111,8 @@ export const updateBudgetRequestStatus = createAsyncThunk(
 const budgetRequestSlice = createSlice({
   name: "budgetRequest",
   initialState: {
-    requests: [],
+    allRequests: [],       // All budget requests (admin/global view)
+    projectRequests: [],   // Requests filtered by project
     currentRequest: null,
     loading: false,
     error: null,
@@ -319,7 +134,8 @@ const budgetRequestSlice = createSlice({
       })
       .addCase(createBudgetRequest.fulfilled, (state, action) => {
         state.loading = false;
-        state.requests.unshift(action.payload); // Add to top (newest first)
+        state.allRequests.unshift(action.payload);
+        state.projectRequests.unshift(action.payload); // if project matches current view
       })
       .addCase(createBudgetRequest.rejected, (state, action) => {
         state.loading = false;
@@ -334,7 +150,7 @@ const budgetRequestSlice = createSlice({
       })
       .addCase(fetchBudgetRequests.fulfilled, (state, action) => {
         state.loading = false;
-        state.requests = action.payload;
+        state.allRequests = action.payload;
       })
       .addCase(fetchBudgetRequests.rejected, (state, action) => {
         state.loading = false;
@@ -349,7 +165,7 @@ const budgetRequestSlice = createSlice({
       })
       .addCase(fetchBudgetRequestsByProject.fulfilled, (state, action) => {
         state.loading = false;
-        state.requests = action.payload;
+        state.projectRequests = action.payload;
       })
       .addCase(fetchBudgetRequestsByProject.rejected, (state, action) => {
         state.loading = false;
@@ -379,10 +195,12 @@ const budgetRequestSlice = createSlice({
       })
       .addCase(updateBudgetRequest.fulfilled, (state, action) => {
         state.loading = false;
-        const idx = state.requests.findIndex(
-          (r) => r.requestId === action.payload.requestId
-        );
-        if (idx !== -1) state.requests[idx] = action.payload;
+        const updateInArray = (arr) => {
+          const idx = arr.findIndex(r => r.requestId === action.payload.requestId);
+          if (idx !== -1) arr[idx] = action.payload;
+        };
+        updateInArray(state.allRequests);
+        updateInArray(state.projectRequests);
       })
       .addCase(updateBudgetRequest.rejected, (state, action) => {
         state.loading = false;
@@ -397,9 +215,9 @@ const budgetRequestSlice = createSlice({
       })
       .addCase(deleteBudgetRequest.fulfilled, (state, action) => {
         state.loading = false;
-        state.requests = state.requests.filter(
-          (r) => r.requestId !== action.payload
-        );
+        const removeFromArray = (arr) => arr.filter(r => r.requestId !== action.payload);
+        state.allRequests = removeFromArray(state.allRequests);
+        state.projectRequests = removeFromArray(state.projectRequests);
       })
       .addCase(deleteBudgetRequest.rejected, (state, action) => {
         state.loading = false;
@@ -414,10 +232,12 @@ const budgetRequestSlice = createSlice({
       })
       .addCase(updateBudgetRequestStatus.fulfilled, (state, action) => {
         state.loading = false;
-        const idx = state.requests.findIndex(
-          (r) => r.requestId === action.payload.requestId
-        );
-        if (idx !== -1) state.requests[idx] = action.payload;
+        const updateInArray = (arr) => {
+          const idx = arr.findIndex(r => r.requestId === action.payload.requestId);
+          if (idx !== -1) arr[idx] = action.payload;
+        };
+        updateInArray(state.allRequests);
+        updateInArray(state.projectRequests);
       })
       .addCase(updateBudgetRequestStatus.rejected, (state, action) => {
         state.loading = false;

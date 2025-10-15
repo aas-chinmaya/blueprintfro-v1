@@ -8,6 +8,7 @@ const nunito = Nunito({
   subsets: ["latin"],
   variable: "--font-nunito",
   display: "swap",
+  fallback: ["Arial", "sans-serif"], // Add this line
 });
 
 export const metadata = {
