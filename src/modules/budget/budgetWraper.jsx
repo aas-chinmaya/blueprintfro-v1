@@ -107,7 +107,7 @@ export default function ProjectBudgetWrapper({ projectId, projectName }) {
       <div className="min-h-screen flex flex-col items-center justify-center space-y-6 p-4 text-center">
         <h1 className="text-2xl font-bold">{projectName || "Project"}</h1>
         <p className="text-muted-foreground">
-          Client Budget: {ClientBudget || 0}
+          Client Budget INR: {ClientBudget || 0}
         </p>
 
         <Button onClick={() => setOpenCreateAccountDialog(true)}>
@@ -127,7 +127,7 @@ export default function ProjectBudgetWrapper({ projectId, projectName }) {
                 <>
                   <Input
                     type="number"
-                    placeholder="Initial Budget Amount"
+                    placeholder="Initial Budget Amount in INR"
                     value={initialBudget}
                     onChange={(e) => setInitialBudget(e.target.value)}
                   />
@@ -194,11 +194,11 @@ export default function ProjectBudgetWrapper({ projectId, projectName }) {
           totalSpent={totalSpent}
         />
 
-        <Tabs defaultValue="categories" className="space-y-4">
+        <Tabs defaultValue="categories" className="space-y-2">
           <TabsList>
             <TabsTrigger value="categories">Categories</TabsTrigger>
-            <TabsTrigger value="requests">Budget Requests</TabsTrigger>
-            <TabsTrigger value="transactions">Transaction History</TabsTrigger>
+            <TabsTrigger value="requests">Requests</TabsTrigger>
+            <TabsTrigger value="transactions">Transactions</TabsTrigger>
           </TabsList>
 
           <TabsContent value="categories">
@@ -225,7 +225,7 @@ export default function ProjectBudgetWrapper({ projectId, projectName }) {
         onOpenChange={setAddFundDialogOpen}
       />
       <CreateCategoryDialog
-        accountId={BudgetAccount?.accountId}
+        BudgetAccount={BudgetAccount}
         open={createCategoryDialogOpen}
         onOpenChange={setCreateCategoryDialogOpen}
         onCreateCategory={() => {}}

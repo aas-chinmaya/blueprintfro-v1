@@ -38,7 +38,7 @@ export function TransactionHistory({ transactions }) {
     
         <div className="rounded-md border w-full">
           <Table>
-            <TableHeader>
+            <TableHeader className="bg-gray-50">
               <TableRow>
                 <TableHead>Type</TableHead>
                 <TableHead>Amount</TableHead>

@@ -38,8 +38,11 @@ import projectAnalyticsReducer from "@/features/projectAnalyticsSlice";
 import slotReducer from '@/features/master/slotMasterSlice';
 import serviceReducer from '@/features/master/serviceMasterSlice';
 import industriesReducer from '@/features/master/industriesMasterSlice';
+import manpowerMasterReducer from '@/features/master/manpowerMasterSlice';
+
 import budgetReducer from '@/features/budget/budgetSlice'; // Import the budget request reducer
 import budgetRequestReducer from '@/features/budget/budgetRequestSlice'; // Import the budget request reducer
+import budgetCategoryReducer from '@/features/budget/budgetCategorySlice'; // Import the budget request reducer
 
 
 
@@ -101,6 +104,7 @@ export const store = configureStore({
   cause: causeReducer,
   budgetRequest: budgetRequestReducer,
   budget: budgetReducer,
+  budgetCategory: budgetCategoryReducer,
 
   payment: paymentReducer,
   documents: documentReducer,
@@ -110,7 +114,7 @@ export const store = configureStore({
   slots: slotReducer,
   services: serviceReducer,
   industries:industriesReducer,
-
+manpowers:manpowerMasterReducer,
 
   teamMeetings:teamMeetingsReducer,
 teammeetingMom:teammeetingMomReducer,

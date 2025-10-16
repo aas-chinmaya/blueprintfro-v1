@@ -115,6 +115,7 @@ export const fullNav = [
     roles: ["cpcGroup"],
     items: [
       { title: "Service", url: "/master/services", roles: ["cpcGroup"] },
+      { title: "Work Force", url: "/master/work-force-management", roles: ["cpcGroup"] },
       { title: "Industry", url: "/master/industry", roles: ["cpcGroup"] },
       { title: "Meeting Slots", url: "/master/slots", roles: ["cpcGroup"] },
     ],

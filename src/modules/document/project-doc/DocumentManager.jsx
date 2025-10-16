@@ -535,7 +535,8 @@ export default function DocumentManager({ project, projectId }) {
               <div className="flex-1 min-w-[140px]">
                 <Button
                   onClick={() => setIsUploadOpen(true)}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm h-[38px] shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                  className="w-full  shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                  // className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm h-[38px] shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                   disabled={deleting || downloading}
                 >
                   <Upload className="w-4 h-4 mr-2" />

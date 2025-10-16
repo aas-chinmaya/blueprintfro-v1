@@ -34,7 +34,6 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import Spinner from '@/components/loader/Spinner';
-import { useCurrentUser } from '@/hooks/useCurrentUser';
 
 // Constants for styling
 const statusColors = {

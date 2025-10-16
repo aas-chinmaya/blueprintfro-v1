@@ -1,89 +1,8 @@
 
-// import { useState } from "react";
-// import {
-//   Dialog,
-//   DialogContent,
-//   DialogDescription,
-//   DialogFooter,
-//   DialogHeader,
-//   DialogTitle,
-// } from "@/components/ui/dialog";
-// import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
-// import { Label } from "@/components/ui/label";
+"use client";
 
-// export function CreateCategoryDialog({
-//   open,
-//   onOpenChange,
-//   accountId,
-//   onCreateCategory,
-//   availableFunds,
-// }) {
-//   const [name, setName] = useState("");
-//   const [allocatedAmount, setAllocatedAmount] = useState("");
-
-//   const handleSubmit = (e) => {
-//     e.preventDefault();
-//     const amount = parseFloat(allocatedAmount);
-//     if (name.trim() && amount > 0 && amount <= availableFunds) {
-//       onCreateCategory(name, amount);
-//       setName("");
-//       setAllocatedAmount("");
-//       onOpenChange(false);
-//     }
-//   };
-
-//   return (
-//     <Dialog open={open} onOpenChange={onOpenChange}>
-//       <DialogContent>
-//         <form onSubmit={handleSubmit}>
-//           <DialogHeader>
-//             <DialogTitle>Create New Category</DialogTitle>
-//             <DialogDescription>
-//               Create a new category and allocate funds from the main account.
-//             </DialogDescription>
-//           </DialogHeader>
-//           <div className="grid gap-4 py-4">
-//             <div className="grid gap-2">
-//               <Label htmlFor="categoryName">Category Name</Label>
-//               <Input
-//                 id="categoryName"
-//                 placeholder="e.g., Development, Marketing"
-//                 value={name}
-//                 onChange={(e) => setName(e.target.value)}
-//                 required
-//               />
-//             </div>
-//             <div className="grid gap-2">
-//               <Label htmlFor="allocated">Allocated Amount</Label>
-//               <Input
-//                 id="allocated"
-//                 type="number"
-//                 placeholder="0.00"
-//                 value={allocatedAmount}
-//                 onChange={(e) => setAllocatedAmount(e.target.value)}
-//                 required
-//                 min="0.01"
-//                 step="0.01"
-//                 max={availableFunds}
-//               />
-//               <p className="text-xs text-muted-foreground">
-//                 Available: ${availableFunds.toFixed(2)}
-//               </p>
-//             </div>
-//           </div>
-//           <DialogFooter>
-//             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-//               Cancel
-//             </Button>
-//             <Button type="submit">Create Category</Button>
-//           </DialogFooter>
-//         </form>
-//       </DialogContent>
-//     </Dialog>
-//   );
-// }
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
   Dialog,
   DialogContent,
@@ -95,101 +14,149 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { addBudgetCategory } from "@/features/budget/budgetCategorySlice";
 
-export function CreateCategoryDialog({
-  open,
-  onOpenChange,
-  accountId,
-  onCreateCategory,
-  availableFunds,
-}) {
+export function CreateCategoryDialog({ open, BudgetAccount, onOpenChange }) {
+  const dispatch = useDispatch();
+  const { status, error } = useSelector((state) => state.budgetCategory);
+
   const [name, setName] = useState("");
-  const [allocatedAmount, setAllocatedAmount] = useState("");
+  const [description, setDescription] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const suggestedCategories = [
     "Analysis",
     "Design",
     "Development",
-    "Test & QA",
-    "Deployment & Infra",
+    "Testing & QA",
+    "Deployment & Infrastructure",
     "Maintenance & Support",
+    "Documentation",
+    "Research",
   ];
+
+  const filteredSuggestions = suggestedCategories.filter(
+    (cat) => cat.toLowerCase().includes(name.toLowerCase()) && name.trim() !== ""
+  );
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const amount = parseFloat(allocatedAmount);
-    if (name.trim() && amount > 0 && amount <= availableFunds) {
-      onCreateCategory(name, amount);
-      setName("");
-      setAllocatedAmount("");
-      onOpenChange(false);
-    }
+
+    if (!name.trim()) return;
+
+    const payload = {
+      accountId:  BudgetAccount?.accountId, // ✅ FIXED here
+      name: name.trim(),
+      description: description.trim(),
+    };
+
+    console.log("Submitting payload:", payload); // 🧩 Debug check
+
+    dispatch(addBudgetCategory(payload)).then((res) => {
+      if (!res.error) {
+        resetForm();
+        onOpenChange(false);
+      }
+    });
   };
 
-  const handleSuggestedClick = (category) => {
-    setName(category);
+  const resetForm = () => {
+    setName("");
+    setDescription("");
+    setShowSuggestions(false);
+    // dispatch(clearError());
   };
+
+  useEffect(() => {
+    if (!open) resetForm();
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-w-md">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Create New Category</DialogTitle>
             <DialogDescription>
-              Create a new category and allocate funds from the main account.
+              Enter a name and brief description for your category.
             </DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
+            {/* Category Name */}
+            <div className="relative">
               <Label htmlFor="categoryName">Category Name</Label>
               <Input
                 id="categoryName"
-                placeholder="e.g., Development, Marketing"
+                placeholder="e.g., Development"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  setShowSuggestions(true);
+                }}
                 required
               />
-              <div className="flex flex-wrap gap-2 mt-1">
-                {suggestedCategories.map((cat) => (
-                  <Button
-                    key={cat}
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleSuggestedClick(cat)}
-                  >
-                    {cat}
-                  </Button>
-                ))}
-              </div>
+              {showSuggestions && filteredSuggestions.length > 0 && (
+                <div className="absolute z-10 mt-1 w-full bg-white border rounded shadow-sm max-h-40 overflow-auto">
+                  <Label className="px-2 py-1 text-xs text-muted-foreground">
+                    Suggestions
+                  </Label>
+                  <ul>
+                    {filteredSuggestions.map((cat) => (
+                      <li
+                        key={cat}
+                        className="px-2 py-1 cursor-pointer hover:bg-gray-100"
+                        onClick={() => {
+                          setName(cat);
+                          setShowSuggestions(false);
+                        }}
+                      >
+                        {cat}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
 
+            {/* Description */}
             <div className="grid gap-2">
-              <Label htmlFor="allocated">Allocated Amount</Label>
-              <Input
-                id="allocated"
-                type="number"
-                placeholder="0.00"
-                value={allocatedAmount}
-                onChange={(e) => setAllocatedAmount(e.target.value)}
-                required
-                min="0.01"
-                step="0.01"
-                max={availableFunds}
+              <Label htmlFor="categoryDesc">Description (max 100 charactor.)</Label>
+              <textarea
+                id="categoryDesc"
+                placeholder="description"
+                 maxLength={100}
+                value={description}
+               
+                onChange={(e) => {
+  const value = e.target.value;
+  if (value.length <= 100) { // for example, 100 characters max
+    setDescription(value);
+  }
+}}
+
+                className="border rounded p-2 resize-none w-full min-h-[80px]"
               />
               <p className="text-xs text-muted-foreground">
-                Available: ${availableFunds.toFixed(2)}
+                {description.length}/100 charactor
               </p>
             </div>
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                resetForm();
+                onOpenChange(false);
+              }}
+            >
               Cancel
             </Button>
-            <Button type="submit">Create Category</Button>
+            <Button type="submit" disabled={status === "loading"}>
+              {status === "loading" ? "Creating..." : "Create"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
