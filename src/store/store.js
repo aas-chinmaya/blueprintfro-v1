@@ -43,6 +43,7 @@ import manpowerMasterReducer from '@/features/master/manpowerMasterSlice';
 import budgetReducer from '@/features/budget/budgetSlice'; // Import the budget request reducer
 import budgetRequestReducer from '@/features/budget/budgetRequestSlice'; // Import the budget request reducer
 import budgetCategoryReducer from '@/features/budget/budgetCategorySlice'; // Import the budget request reducer
+import budgetEntityReducer from '@/features/budget/budgetEntitySlice'; // Import the budget request reducer
 
 
 
@@ -105,7 +106,7 @@ export const store = configureStore({
   budgetRequest: budgetRequestReducer,
   budget: budgetReducer,
   budgetCategory: budgetCategoryReducer,
-
+budgetEntity: budgetEntityReducer,
   payment: paymentReducer,
   documents: documentReducer,
   profile: profileReducer,

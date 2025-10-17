@@ -39,8 +39,8 @@ export const getBudgetCategoryById = createAsyncThunk(
   'budgetCategories/getBudgetCategoryById',
   async (id, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get(`${API_URL}/${id}`);
-      return response.data;
+      const response = await axiosInstance.get(`${API_URL}/getcatgorybyid/${id}`);
+      return response.data.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
     }
@@ -52,7 +52,7 @@ export const updateBudgetCategory = createAsyncThunk(
   'budgetCategories/updateBudgetCategory',
   async ({ id, ...categoryData }, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.put(`${API_URL}/${id}`, categoryData);
+      const response = await axiosInstance.put(`${API_URL}/updatecatgory/${id}`, categoryData);
       return response.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -78,6 +78,7 @@ export const deleteBudgetCategory = createAsyncThunk(
 // ==========================
 const initialState = {
   categories: [],
+  category: null,
   status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
   error: null,
 };
@@ -119,6 +120,9 @@ const budgetCategorySlice = createSlice({
       // Get by ID
       .addCase(getBudgetCategoryById.rejected, (state, action) => {
         state.error = action.payload || action.error.message;
+      })
+      .addCase(getBudgetCategoryById.fulfilled, (state, action) => {
+        state.category = action.payload ;
       })
 
       // Update

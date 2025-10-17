@@ -6,17 +6,18 @@ import {
   fetchBudgetAccountsByProject,
   createBudgetAccount,
 } from "@/features/budget/budgetSlice";
-import { FundOverview } from "./FundOverview";
-import { CategoryCard } from "./CategoryCard";
-import BudgetRequestsPanel from "./BudgetRequestsPanel";
-import { TransactionHistory } from "./TransactionHistory";
-import { AddFundDialog } from "./AddFundDialog";
-import { CreateCategoryDialog } from "./CreateCategoryDialog";
+
+import { FundOverview } from "@/modules/budget/fund/FundOverview";
+import BudgetRequestsPanel from "@/modules/budget/request/BudgetRequestsPanel";
+import { TransactionHistory } from "@/modules/budget/fund/TransactionHistory";
+import { AddFundDialog } from "@/modules/budget/fund/AddFundDialog";
+import { CreateCategoryDialog } from "@/modules/budget/category/CreateCategoryDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Wallet, CheckCircle } from "lucide-react";
+import  CategoryList  from "@/modules/budget/category/CategoryList";
 
 export default function ProjectBudgetWrapper({ projectId, projectName }) {
   const dispatch = useDispatch();
@@ -196,13 +197,13 @@ export default function ProjectBudgetWrapper({ projectId, projectName }) {
 
         <Tabs defaultValue="categories" className="space-y-2">
           <TabsList>
-            <TabsTrigger value="categories">Categories</TabsTrigger>
             <TabsTrigger value="requests">Requests</TabsTrigger>
             <TabsTrigger value="transactions">Transactions</TabsTrigger>
+            <TabsTrigger value="categories">Categories</TabsTrigger>
           </TabsList>
 
           <TabsContent value="categories">
-            <CategoryCard BudgetAccount={BudgetAccount} projectId={projectId} />
+            <CategoryList BudgetAccount={BudgetAccount} projectId={projectId} />
           </TabsContent>
 
           <TabsContent value="requests">
@@ -236,3 +237,12 @@ export default function ProjectBudgetWrapper({ projectId, projectName }) {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -14,11 +13,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { addBudgetCategory } from "@/features/budget/budgetCategorySlice";
+import {
+  getBudgetCategoryById,
+  updateBudgetCategory,
+  clearError,
+} from "@/features/budget/budgetCategorySlice";
 
-export function CreateCategoryDialog({ open, BudgetAccount, onOpenChange }) {
+export function EditCategoryDialog({ open, BudgetAccount, onOpenChange, categoryId }) {
   const dispatch = useDispatch();
-  const { status, error } = useSelector((state) => state.budgetCategory);
+  const { status, error, category } = useSelector((state) => state.budgetCategory);
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -39,20 +42,44 @@ export function CreateCategoryDialog({ open, BudgetAccount, onOpenChange }) {
     (cat) => cat.toLowerCase().includes(name.toLowerCase()) && name.trim() !== ""
   );
 
+  // Fetch category details for editing
+  useEffect(() => {
+    if (categoryId) {
+      dispatch(getBudgetCategoryById(categoryId));
+    }
+  }, [categoryId, dispatch]);
+
+  // Populate form when category data is loaded
+  useEffect(() => {
+    if (category) {
+      setName(category.name || "");
+      setDescription(category.description || "");
+    }
+  }, [category]);
+
+  const resetForm = () => {
+    setName("");
+    setDescription("");
+    setShowSuggestions(false);
+    dispatch(clearError());
+  };
+
+  useEffect(() => {
+    if (!open) resetForm();
+  }, [open, dispatch]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
-
     if (!name.trim()) return;
 
     const payload = {
-      accountId:  BudgetAccount?.accountId, // ✅ FIXED here
+      accountId: BudgetAccount?.accountId,
       name: name.trim(),
       description: description.trim(),
     };
 
-    console.log("Submitting payload:", payload); // 🧩 Debug check
-
-    dispatch(addBudgetCategory(payload)).then((res) => {
+    // Edit mode only
+    dispatch(updateBudgetCategory({ id: categoryId, ...payload })).then((res) => {
       if (!res.error) {
         resetForm();
         onOpenChange(false);
@@ -60,25 +87,14 @@ export function CreateCategoryDialog({ open, BudgetAccount, onOpenChange }) {
     });
   };
 
-  const resetForm = () => {
-    setName("");
-    setDescription("");
-    setShowSuggestions(false);
-    // dispatch(clearError());
-  };
-
-  useEffect(() => {
-    if (!open) resetForm();
-  }, [open]);
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Create New Category</DialogTitle>
+            <DialogTitle>Edit Category</DialogTitle>
             <DialogDescription>
-              Enter a name and brief description for your category.
+              Update the name and description of your category.
             </DialogDescription>
           </DialogHeader>
 
@@ -121,27 +137,25 @@ export function CreateCategoryDialog({ open, BudgetAccount, onOpenChange }) {
 
             {/* Description */}
             <div className="grid gap-2">
-              <Label htmlFor="categoryDesc">Description (max 100 charactor.)</Label>
+              <Label htmlFor="categoryDesc">Description (max 100 characters)</Label>
               <textarea
                 id="categoryDesc"
-                placeholder="description"
-                 maxLength={100}
+                placeholder="Description"
+                maxLength={100}
                 value={description}
-               
                 onChange={(e) => {
-  const value = e.target.value;
-  if (value.length <= 100) { // for example, 100 characters max
-    setDescription(value);
-  }
-}}
-
+                  const value = e.target.value;
+                  if (value.length <= 100) setDescription(value);
+                }}
                 className="border rounded p-2 resize-none w-full min-h-[80px]"
               />
               <p className="text-xs text-muted-foreground">
-                {description.length}/100 charactor
+                {description.length}/100 characters
               </p>
             </div>
           </div>
+
+          {error && <p className="text-red-500 text-sm">{error}</p>}
 
           <DialogFooter>
             <Button
@@ -155,7 +169,7 @@ export function CreateCategoryDialog({ open, BudgetAccount, onOpenChange }) {
               Cancel
             </Button>
             <Button type="submit" disabled={status === "loading"}>
-              {status === "loading" ? "Creating..." : "Create"}
+              {status === "loading" ? "Updating..." : "Update"}
             </Button>
           </DialogFooter>
         </form>
