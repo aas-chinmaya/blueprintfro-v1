@@ -91,7 +91,7 @@ export default function ProjectOnboarding() {
     if (successMessage && !hasHandledSuccess) {
       setHasHandledSuccess(true);
       dispatch(fetchAllProjects());
-      router.push("/project");
+      router.push("/project-management");
       dispatch(resetProjectCreation());
     }
     if (error) {
