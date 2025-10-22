@@ -58,7 +58,7 @@ export const fullNav = [
    icon: "CalendarDays",
    roles: ["cpcGroup","employeeGroup"],
    items: [
-     { title: "All Project", url: "/project", roles: ["cpcGroup","employeeGroup"] },
+     { title: "All Project", url: "/project-management", roles: ["cpcGroup","employeeGroup"] },
      { title: "Active Team", url: "/team", roles: ["cpcGroup","employeeGroup"] },
      { title: "All Task", url: "/task", roles: ["cpcGroup","employeeGroup"] },
      { title: "All Bug", url: "/bug", roles: ["cpcGroup"] },
@@ -99,6 +99,14 @@ export const fullNav = [
   },
   
 
+  {
+    title: "Budget Management",
+    url: "/budget-management/company",
+    icon: "FolderClosed",
+    roles: ["cpcGroup"],
+    
+  },
+ 
   {
     title: "Concerns",
     url: "#",

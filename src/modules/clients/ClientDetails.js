@@ -68,7 +68,7 @@ export default function ClientDetails() {
   }, [clientId, dispatch]);
 
   const handleProjectClick = (projectId) => {
-    router.push(`/project/${projectId}`);
+    router.push(`/project-management/${projectId}`);
   };
 
   const clientFields = [

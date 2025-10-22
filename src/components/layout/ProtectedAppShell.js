@@ -33,8 +33,11 @@ export default function ProtectedAppShell({ children }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  const { user } = useSelector((state) => state.auth) || {};
-  const {employeeData,userData}=useSelector((state) => state.user)
+
+    const { isAuthenticated, isTokenChecked } = useSelector((state) => state.auth);
+  
+
+  
   const { currentUser } = useCurrentUser();
   const { profileImageUrl, loading: profileLoading } = useSelector(
     (state) => state.profile
