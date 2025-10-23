@@ -51,6 +51,12 @@ export const fullNav = [
     icon: "Inbox",
     roles: ["cpcGroup", "employeeGroup"],
   },
+  {
+    title: "TimeSheet",
+    url: "/time-sheet",
+    icon: "Inbox",
+    roles: ["cpcGroup", "employeeGroup"],
+  },
 
   {
    title: "Project Management",
